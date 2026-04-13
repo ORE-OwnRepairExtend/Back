@@ -7,9 +7,13 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     // 400
+    ID_TOKEN_MISSING(HttpStatus.BAD_REQUEST, "ID 토큰이 필요합니다."),
 
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증 정보가 유효하지 않습니다."),
+    INVALID_GOOGLE_TOKEN(HttpStatus.UNAUTHORIZED, "구글 토큰이 유효하지 않습니다."),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
 
     // 404
 
