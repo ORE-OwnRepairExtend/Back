@@ -6,12 +6,16 @@ import com.ore.backend.global.exception.ErrorCode;
 import com.ore.backend.security.JwtProvider;
 import com.ore.backend.user.dto.GoogleLoginRequest;
 import com.ore.backend.user.dto.GoogleLoginResponse;
+import com.ore.backend.user.dto.RefreshTokenResponse;
 import com.ore.backend.user.entity.UserEntity;
 import com.ore.backend.user.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -59,5 +63,44 @@ public class UserService {
                                 .build()
                 )
                 .build();
+    }
+
+    public RefreshTokenResponse refreshAccessToken(HttpServletRequest request) {
+
+        String refreshToken = extractRefreshToken(request);
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_MISSING);
+        }
+
+        // refreshToken 검증
+        try {
+            jwtProvider.validateToken(refreshToken);
+            jwtProvider.validateRefreshToken(refreshToken);
+        } catch (CustomException e) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        UUID userId = jwtProvider.getUserId(refreshToken);
+
+        // accessToken 재발급
+        String newAccessToken = jwtProvider.createAccessToken(userId);
+
+        return new RefreshTokenResponse(newAccessToken);
+    }
+
+    private String extractRefreshToken(HttpServletRequest request) {
+
+        if (request.getCookies() == null) {
+            return null;
+        }
+
+        for (Cookie cookie : request.getCookies()) {
+            if ("refreshToken".equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+
+        return null;
     }
 }

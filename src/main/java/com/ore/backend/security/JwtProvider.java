@@ -29,18 +29,19 @@ public class JwtProvider {
     }
 
     public String createAccessToken(UUID userId) {
-        return createToken(userId, ACCESS_TOKEN_EXPIRE);
+        return createToken(userId, ACCESS_TOKEN_EXPIRE, "access");
     }
 
     public String createRefreshToken(UUID userId) {
-        return createToken(userId, REFRESH_TOKEN_EXPIRE);
+        return createToken(userId, REFRESH_TOKEN_EXPIRE, "refresh");
     }
 
-    private String createToken(UUID userId, long expireTime) {
+    private String createToken(UUID userId, long expireTime, String type) {
         Date now = new Date();
 
         return Jwts.builder()
                 .setSubject(userId.toString())
+                .claim("type", type)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + expireTime))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -57,6 +58,17 @@ public class JwtProvider {
         } catch (ExpiredJwtException e) {
             throw new CustomException(ErrorCode.TOKEN_EXPIRED);
         } catch (JwtException e) {
+            throw new CustomException(ErrorCode.INVALID_TOKEN);
+        }
+    }
+
+    // refreshToken 전용 검증
+    public void validateRefreshToken(String token) {
+        Claims claims = parseClaims(token);
+
+        String type = claims.get("type", String.class);
+
+        if (!"refresh".equals(type)) {
             throw new CustomException(ErrorCode.INVALID_TOKEN);
         }
     }
