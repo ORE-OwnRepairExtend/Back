@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.ore.backend.user.dto.LoginResult;
+import com.ore.backend.user.entity.RefreshTokenEntity;
+import com.ore.backend.user.repository.RefreshTokenRepository;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,6 +26,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
     private final GoogleTokenVerifier googleTokenVerifier;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public LoginResult loginWithGoogle(GoogleLoginRequest request) {
 
@@ -50,6 +53,17 @@ public class UserService {
         // JWT 발급
         String accessToken = jwtProvider.createAccessToken(user.getUserId());
         String refreshToken = jwtProvider.createRefreshToken(user.getUserId());
+
+        // refreshToken db 저장
+        RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findByUser(user)
+                .orElseGet(() -> RefreshTokenEntity.builder()
+                        .user(user)
+                        .refreshToken(refreshToken)
+                        .build()
+                );
+
+        refreshTokenEntity.updateRefreshToken(refreshToken);
+        refreshTokenRepository.save(refreshTokenEntity);
 
         // 클라이언트 응답 바디
         GoogleLoginResponse response = GoogleLoginResponse.builder()
@@ -86,6 +100,9 @@ public class UserService {
         } catch (CustomException e) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
+
+        refreshTokenRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED));
 
         UUID userId = jwtProvider.getUserId(refreshToken);
 
