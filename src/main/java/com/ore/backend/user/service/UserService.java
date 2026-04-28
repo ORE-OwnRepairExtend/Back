@@ -13,6 +13,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.ore.backend.user.dto.LoginResult;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -24,7 +25,7 @@ public class UserService {
     private final JwtProvider jwtProvider;
     private final GoogleTokenVerifier googleTokenVerifier;
 
-    public GoogleLoginResponse loginWithGoogle(GoogleLoginRequest request) {
+    public LoginResult loginWithGoogle(GoogleLoginRequest request) {
 
         // idToken 검증
         if (request.getIdToken() == null || request.getIdToken().isBlank()) {
@@ -50,10 +51,9 @@ public class UserService {
         String accessToken = jwtProvider.createAccessToken(user.getUserId());
         String refreshToken = jwtProvider.createRefreshToken(user.getUserId());
 
-        // 응답 생성
-        return GoogleLoginResponse.builder()
+        // 클라이언트 응답 바디
+        GoogleLoginResponse response = GoogleLoginResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
                 .user(
                         GoogleLoginResponse.UserInfo.builder()
                                 .userId(user.getUserId())
@@ -62,6 +62,12 @@ public class UserService {
                                 .profileImage(user.getProfileImage())
                                 .build()
                 )
+                .build();
+
+        // 서버 내부에서만 쓰는 임시 결과 객체
+        return LoginResult.builder()
+                .response(response)
+                .refreshToken(refreshToken)
                 .build();
     }
 

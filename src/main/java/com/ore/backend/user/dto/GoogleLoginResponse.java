@@ -10,7 +10,6 @@ import java.util.UUID;
 public class GoogleLoginResponse {
 
     private String accessToken;
-    private String refreshToken;
     private UserInfo user;
 
     @Getter

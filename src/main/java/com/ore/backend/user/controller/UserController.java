@@ -1,10 +1,10 @@
 package com.ore.backend.user.controller;
 
-import com.ore.backend.user.dto.GoogleLoginRequest;
-import com.ore.backend.user.dto.GoogleLoginResponse;
-import com.ore.backend.user.dto.RefreshTokenResponse;
+import com.ore.backend.user.dto.*;
 import com.ore.backend.user.service.UserService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -19,21 +19,20 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/auth/google")
-    public ResponseEntity<GoogleLoginResponse> googleLogin(
-            @RequestBody GoogleLoginRequest request
+    public GoogleLoginResponse loginWithGoogle(
+            @RequestBody GoogleLoginRequest request,
+            HttpServletResponse response
     ) {
+        LoginResult loginResult = userService.loginWithGoogle(request);
 
-        GoogleLoginResponse result = userService.loginWithGoogle(request);
+        Cookie cookie = new Cookie("refreshToken", loginResult.getRefreshToken());
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 24 * 14); // 14일
 
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", result.getRefreshToken())
-                .httpOnly(true)
-                .path("/")
-                .maxAge(1209600)
-                .build();
+        response.addCookie(cookie);
 
-        return ResponseEntity.ok()
-                .header("Set-Cookie", cookie.toString())
-                .body(result);
+        return loginResult.getResponse();
     }
 
     @PostMapping("/auth/refresh")
@@ -43,4 +42,5 @@ public class UserController {
         RefreshTokenResponse response = userService.refreshAccessToken(request);
         return ResponseEntity.ok(response);
     }
+
 }
