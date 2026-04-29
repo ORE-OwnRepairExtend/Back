@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import com.ore.backend.user.dto.LoginResult;
 import com.ore.backend.user.entity.RefreshTokenEntity;
 import com.ore.backend.user.repository.RefreshTokenRepository;
+import com.ore.backend.user.dto.GetMyInfoResponse;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,6 +30,7 @@ public class UserService {
     private final GoogleTokenVerifier googleTokenVerifier;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    @Transactional
     public LoginResult loginWithGoogle(GoogleLoginRequest request) {
 
         // idToken 검증
@@ -85,6 +88,7 @@ public class UserService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public RefreshTokenResponse refreshAccessToken(HttpServletRequest request) {
 
         String refreshToken = extractRefreshToken(request);
@@ -125,5 +129,41 @@ public class UserService {
         }
 
         return null;
+    }
+
+    @Transactional
+    public void logout(HttpServletRequest request) {
+
+        // 쿠키에서 refreshToken 추출
+        String refreshToken = extractRefreshToken(request);
+
+        // refreshToken 없으면 예외 처리
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_MISSING);
+        }
+
+        // DB에 저장된 refreshToken인지 확인
+        refreshTokenRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED));
+
+        // refreshToken 무효화 처리
+        refreshTokenRepository.deleteByRefreshToken(refreshToken);
+    }
+
+    @Transactional(readOnly = true)
+    public GetMyInfoResponse getMyInfo(UUID userId) {
+
+        // 사용자 조회
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 사용자 정보 응답 생성
+        return GetMyInfoResponse.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .profileImage(user.getProfileImage())
+                .createdAt(user.getCreatedAt())
+                .build();
     }
 }
