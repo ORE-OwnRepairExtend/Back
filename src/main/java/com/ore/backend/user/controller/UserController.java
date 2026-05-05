@@ -77,4 +77,18 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/users/me")
+    public ResponseEntity<UpdateMyInfoResponse> updateMyInfo(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody UpdateMyInfoRequest request
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        UpdateMyInfoResponse response = userService.updateMyInfo(userId, request);
+
+        return ResponseEntity.ok(response);
+    }
 }

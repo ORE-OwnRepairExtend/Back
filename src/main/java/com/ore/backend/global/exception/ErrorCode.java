@@ -9,6 +9,7 @@ public enum ErrorCode {
     // 400
     ID_TOKEN_MISSING(HttpStatus.BAD_REQUEST, "ID 토큰이 필요합니다."),
     REFRESH_TOKEN_MISSING(HttpStatus.BAD_REQUEST, "Refresh 토큰이 필요합니다."),
+    NO_UPDATE_VALUE(HttpStatus.BAD_REQUEST, "수정할 값이 없습니다."),
 
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증 정보가 유효하지 않습니다."),

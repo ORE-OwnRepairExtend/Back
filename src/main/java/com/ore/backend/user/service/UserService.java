@@ -17,6 +17,8 @@ import com.ore.backend.user.dto.LoginResult;
 import com.ore.backend.user.entity.RefreshTokenEntity;
 import com.ore.backend.user.repository.RefreshTokenRepository;
 import com.ore.backend.user.dto.GetMyInfoResponse;
+import com.ore.backend.user.dto.UpdateMyInfoRequest;
+import com.ore.backend.user.dto.UpdateMyInfoResponse;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -164,6 +166,30 @@ public class UserService {
                 .name(user.getName())
                 .profileImage(user.getProfileImage())
                 .createdAt(user.getCreatedAt())
+                .build();
+    }
+
+    @Transactional
+    public UpdateMyInfoResponse updateMyInfo(UUID userId, UpdateMyInfoRequest request) {
+
+        // 수정할 값이 없는 경우
+        if ((request.getName() == null || request.getName().isBlank())
+                && (request.getProfileImage() == null || request.getProfileImage().isBlank())) {
+            throw new CustomException(ErrorCode.NO_UPDATE_VALUE);
+        }
+
+        // 사용자 조회
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 사용자 정보 수정
+        user.updateProfile(request.getName(), request.getProfileImage());
+
+        // 수정 결과 응답
+        return UpdateMyInfoResponse.builder()
+                .userId(user.getUserId())
+                .name(user.getName())
+                .profileImage(user.getProfileImage())
                 .build();
     }
 }

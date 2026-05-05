@@ -43,4 +43,14 @@ public class UserEntity {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    public void updateProfile(String name, String profileImage) {
+        if (name != null) {
+            this.name = name;
+        }
+
+        if (profileImage != null) {
+            this.profileImage = profileImage;
+        }
+    }
 }
