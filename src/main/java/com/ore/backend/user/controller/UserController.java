@@ -7,9 +7,11 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -78,16 +80,20 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/users/me")
+    @PatchMapping(
+            value = "/users/me",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
     public ResponseEntity<UpdateMyInfoResponse> updateMyInfo(
             @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody UpdateMyInfoRequest request
+            @RequestParam(required = false) String name,
+            @RequestPart(required = false) MultipartFile profileImage
     ) {
         String accessToken = authorizationHeader.replace("Bearer ", "");
 
         UUID userId = jwtProvider.getUserId(accessToken);
 
-        UpdateMyInfoResponse response = userService.updateMyInfo(userId, request);
+        UpdateMyInfoResponse response = userService.updateMyInfo(userId, name, profileImage);
 
         return ResponseEntity.ok(response);
     }

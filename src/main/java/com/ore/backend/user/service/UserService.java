@@ -17,9 +17,9 @@ import com.ore.backend.user.dto.LoginResult;
 import com.ore.backend.user.entity.RefreshTokenEntity;
 import com.ore.backend.user.repository.RefreshTokenRepository;
 import com.ore.backend.user.dto.GetMyInfoResponse;
-import com.ore.backend.user.dto.UpdateMyInfoRequest;
 import com.ore.backend.user.dto.UpdateMyInfoResponse;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -170,11 +170,14 @@ public class UserService {
     }
 
     @Transactional
-    public UpdateMyInfoResponse updateMyInfo(UUID userId, UpdateMyInfoRequest request) {
-
+    public UpdateMyInfoResponse updateMyInfo(
+            UUID userId,
+            String name,
+            MultipartFile profileImage
+    ) {
         // 수정할 값이 없는 경우
-        if ((request.getName() == null || request.getName().isBlank())
-                && (request.getProfileImage() == null || request.getProfileImage().isBlank())) {
+        if ((name == null || name.isBlank())
+                && (profileImage == null || profileImage.isEmpty())) {
             throw new CustomException(ErrorCode.NO_UPDATE_VALUE);
         }
 
@@ -182,8 +185,15 @@ public class UserService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        String profileImageUrl = null;
+
+        // 프로필 이미지가 전달된 경우 S3 업로드
+        if (profileImage != null && !profileImage.isEmpty()) {
+            profileImageUrl = s3Service.upload(profileImage);
+        }
+
         // 사용자 정보 수정
-        user.updateProfile(request.getName(), request.getProfileImage());
+        user.updateProfile(name, profileImageUrl);
 
         // 수정 결과 응답
         return UpdateMyInfoResponse.builder()
