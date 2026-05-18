@@ -10,6 +10,8 @@ public enum ErrorCode {
     ID_TOKEN_MISSING(HttpStatus.BAD_REQUEST, "ID 토큰이 필요합니다."),
     REFRESH_TOKEN_MISSING(HttpStatus.BAD_REQUEST, "Refresh 토큰이 필요합니다."),
     NO_UPDATE_VALUE(HttpStatus.BAD_REQUEST, "수정할 값이 없습니다."),
+    IMAGE_REQUIRED(HttpStatus.BAD_REQUEST, "이미지 파일이 필요합니다."),
+    INVALID_SOURCE_TYPE(HttpStatus.BAD_REQUEST, "sourceType이 올바르지 않습니다."),
 
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증 정보가 유효하지 않습니다."),
@@ -19,9 +21,11 @@ public enum ErrorCode {
 
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
+    PRODUCT_SOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "제품 입력 데이터를 찾을 수 없습니다."),
 
     // 500
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다."),
+    IMAGE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드 중 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String message;
