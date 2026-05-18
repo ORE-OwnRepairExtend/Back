@@ -37,19 +37,21 @@ public class ProductSourceService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        String imageUrl = s3ImageStorageService.upload(image);
+        String imageKey = s3ImageStorageService.upload(image);
 
         ProductSourceEntity productSource = ProductSourceEntity.builder()
                 .user(user)
-                .imageUrl(imageUrl)
+                .imageUrl(imageKey)
                 .sourceType(sourceType)
                 .build();
 
         ProductSourceEntity savedSource = productSourceRepository.save(productSource);
 
+        String presignedImageUrl = s3ImageStorageService.generatePresignedUrl(savedSource.getImageUrl());
+
         return CreateProductSourceResponse.builder()
                 .sourceId(savedSource.getSourceId())
-                .imageUrl(savedSource.getImageUrl())
+                .imageUrl(presignedImageUrl)
                 .sourceType(savedSource.getSourceType())
                 .createdAt(savedSource.getCreatedAt())
                 .build();
@@ -68,9 +70,11 @@ public class ProductSourceService {
                 .findBySourceIdAndUser_UserId(sourceId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_SOURCE_NOT_FOUND));
 
+        String presignedImageUrl = s3ImageStorageService.generatePresignedUrl(productSource.getImageUrl());
+
         return GetProductSourceResponse.builder()
                 .sourceId(productSource.getSourceId())
-                .imageUrl(productSource.getImageUrl())
+                .imageUrl(presignedImageUrl)
                 .ocrText(productSource.getOcrText())
                 .modelNumber(productSource.getModelNumber())
                 .sourceType(productSource.getSourceType())

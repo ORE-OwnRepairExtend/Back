@@ -8,9 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.UUID;
 
 @Service
@@ -18,19 +22,24 @@ import java.util.UUID;
 public class S3ImageStorageService {
 
     private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    @Value("${cloud.aws.region.static}")
-    private String region;
-
     public String upload(MultipartFile image) {
+        return upload(image, "product-sources");
+    }
 
+    public String uploadProfileImage(UUID userId, MultipartFile image) {
+        return upload(image, "profile-images/" + userId);
+    }
+
+    private String upload(MultipartFile image, String dirName) {
         try {
             String originalFilename = image.getOriginalFilename();
             String extension = getExtension(originalFilename);
-            String key = "product-sources/" + UUID.randomUUID() + extension;
+            String key = dirName + "/" + UUID.randomUUID() + extension;
 
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucket)
@@ -43,15 +52,51 @@ public class S3ImageStorageService {
                     RequestBody.fromBytes(image.getBytes())
             );
 
-            return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
+            // 중요: URL이 아니라 S3 object key 반환
+            return key;
 
         } catch (IOException e) {
             throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);
         }
     }
 
-    private String getExtension(String originalFilename) {
+    public String generatePresignedUrl(String key) {
+        if (key == null || key.isBlank()) {
+            return null;
+        }
 
+        // 이미 URL이 저장된 기존 데이터 대응용
+        String objectKey = extractKeyIfUrl(key);
+
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucket)
+                .key(objectKey)
+                .build();
+
+        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(10))
+                .getObjectRequest(getObjectRequest)
+                .build();
+
+        return s3Presigner.presignGetObject(presignRequest)
+                .url()
+                .toString();
+    }
+
+    private String extractKeyIfUrl(String value) {
+        if (!value.startsWith("http")) {
+            return value;
+        }
+
+        int amazonawsIndex = value.indexOf(".amazonaws.com/");
+        if (amazonawsIndex == -1) {
+            return value;
+        }
+
+        return value.substring(amazonawsIndex + ".amazonaws.com/".length());
+    }
+
+    private String getExtension(String originalFilename) {
         if (originalFilename == null || !originalFilename.contains(".")) {
             return "";
         }
