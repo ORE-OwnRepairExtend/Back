@@ -32,6 +32,7 @@ public class UserEntity {
     @Column(name = "provider_id", nullable = false)
     private String providerId;
 
+    // S3 object key 저장
     @Column(name = "profile_image")
     private String profileImage;
 

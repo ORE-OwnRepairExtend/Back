@@ -161,12 +161,14 @@ public class UserService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        String profileImageUrl = s3ImageStorageService.generatePresignedUrl(user.getProfileImage());
+
         // 사용자 정보 응답 생성
         return GetMyInfoResponse.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .name(user.getName())
-                .profileImage(user.getProfileImage())
+                .profileImage(profileImageUrl)
                 .createdAt(user.getCreatedAt())
                 .build();
     }
@@ -187,21 +189,23 @@ public class UserService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        String profileImageUrl = null;
+        String profileImageKey = null;
 
         // 프로필 이미지가 전달된 경우 S3 업로드
         if (profileImage != null && !profileImage.isEmpty()) {
-            profileImageUrl = s3ImageStorageService.upload(profileImage);
+            profileImageKey = s3ImageStorageService.uploadProfileImage(user.getUserId(), profileImage);
         }
 
         // 사용자 정보 수정
-        user.updateProfile(name, profileImageUrl);
+        user.updateProfile(name, profileImageKey);
 
-        // 수정 결과 응답
+        // 응답에는 presigned URL 반환
+        String profileImageUrl = s3ImageStorageService.generatePresignedUrl(user.getProfileImage());
+
         return UpdateMyInfoResponse.builder()
                 .userId(user.getUserId())
                 .name(user.getName())
-                .profileImage(user.getProfileImage())
+                .profileImage(profileImageUrl)
                 .build();
     }
 }
