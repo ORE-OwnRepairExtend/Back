@@ -1,6 +1,7 @@
 package com.ore.backend.productSource.controller;
 
 import com.ore.backend.productSource.dto.CreateProductSourceResponse;
+import com.ore.backend.productSource.dto.GetProductSourceResponse;
 import com.ore.backend.productSource.service.ProductSourceService;
 import com.ore.backend.security.JwtProvider;
 import lombok.*;
@@ -31,6 +32,19 @@ public class ProductSourceController {
 
         CreateProductSourceResponse response =
                 productSourceService.createProductSource(userId, image, sourceType);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{sourceId}")
+    public ResponseEntity<GetProductSourceResponse> getProductSource(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID sourceId
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        GetProductSourceResponse response = productSourceService.getProductSource(userId, sourceId);
 
         return ResponseEntity.ok(response);
     }

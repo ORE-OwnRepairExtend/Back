@@ -3,12 +3,13 @@ package com.ore.backend.productSource.service;
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
 import com.ore.backend.productSource.dto.CreateProductSourceResponse;
+import com.ore.backend.productSource.dto.GetProductSourceResponse;
 import com.ore.backend.productSource.entity.ProductSourceEntity;
 import com.ore.backend.productSource.entity.SourceType;
 import com.ore.backend.productSource.repository.ProductSourceRepository;
 import com.ore.backend.user.entity.UserEntity;
 import com.ore.backend.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,5 +60,21 @@ public class ProductSourceService {
         if (image == null || image.isEmpty()) {
             throw new CustomException(ErrorCode.IMAGE_REQUIRED);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public GetProductSourceResponse getProductSource(UUID userId, UUID sourceId) {
+        ProductSourceEntity productSource = productSourceRepository
+                .findBySourceIdAndUser_UserId(sourceId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_SOURCE_NOT_FOUND));
+
+        return GetProductSourceResponse.builder()
+                .sourceId(productSource.getSourceId())
+                .imageUrl(productSource.getImageUrl())
+                .ocrText(productSource.getOcrText())
+                .modelNumber(productSource.getModelNumber())
+                .sourceType(productSource.getSourceType())
+                .createdAt(productSource.getCreatedAt())
+                .build();
     }
 }
