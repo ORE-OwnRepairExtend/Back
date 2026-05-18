@@ -20,6 +20,7 @@ import com.ore.backend.user.dto.GetMyInfoResponse;
 import com.ore.backend.user.dto.UpdateMyInfoResponse;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import com.ore.backend.productSource.service.S3ImageStorageService;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -31,6 +32,7 @@ public class UserService {
     private final JwtProvider jwtProvider;
     private final GoogleTokenVerifier googleTokenVerifier;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final S3ImageStorageService s3ImageStorageService;
 
     @Transactional
     public LoginResult loginWithGoogle(GoogleLoginRequest request) {
@@ -189,7 +191,7 @@ public class UserService {
 
         // 프로필 이미지가 전달된 경우 S3 업로드
         if (profileImage != null && !profileImage.isEmpty()) {
-            profileImageUrl = s3Service.upload(profileImage);
+            profileImageUrl = s3ImageStorageService.upload(profileImage);
         }
 
         // 사용자 정보 수정
