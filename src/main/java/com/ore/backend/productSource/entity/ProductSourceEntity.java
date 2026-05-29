@@ -3,8 +3,6 @@ package com.ore.backend.productSource.entity;
 import com.ore.backend.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,11 +17,10 @@ public class ProductSourceEntity {
 
     @Id
     @GeneratedValue
-    @JdbcType(BinaryJdbcType.class)
-    @Column(name = "source_id", nullable = false)
+    @Column(name = "source_id", nullable = false, updatable = false)
     private UUID sourceId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 

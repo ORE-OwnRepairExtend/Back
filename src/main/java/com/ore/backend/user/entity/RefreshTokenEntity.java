@@ -2,8 +2,6 @@ package com.ore.backend.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -18,12 +16,11 @@ public class RefreshTokenEntity {
 
     @Id
     @GeneratedValue
-    @JdbcType(BinaryJdbcType.class)
-    @Column(name = "refresh_token_id", nullable = false)
+    @Column(name = "refresh_token_id", nullable = false, updatable = false)
     private UUID refreshTokenId;
 
     // 한 사용자당 refreshToken 하나만 저장
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private UserEntity user;
 
