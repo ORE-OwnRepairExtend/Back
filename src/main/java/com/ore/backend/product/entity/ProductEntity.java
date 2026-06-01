@@ -90,6 +90,10 @@ public class ProductEntity {
         }
     }
 
+    public void updateFavorite(Boolean isFavorite) {
+        this.isFavorite = isFavorite;
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();

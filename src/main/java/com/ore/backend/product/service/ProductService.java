@@ -238,4 +238,19 @@ public class ProductService {
                                 .build()
                 ));
     }
+
+    // 즐겨찾기 상태 변경
+    @Transactional
+    public UpdateProductFavoriteResponse updateFavorite(
+            UUID userId,
+            UUID productId,
+            Boolean isFavorite
+    ) {
+        ProductEntity product = productRepository.findByProductIdAndUser_UserId(productId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        product.updateFavorite(isFavorite);
+
+        return UpdateProductFavoriteResponse.from(product);
+    }
 }

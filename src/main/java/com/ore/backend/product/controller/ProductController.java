@@ -86,4 +86,22 @@ public class ProductController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/{productId}/favorite")
+    public ResponseEntity<UpdateProductFavoriteResponse> updateFavorite(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID productId,
+            @Valid @RequestBody UpdateProductFavoriteRequest request
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        UpdateProductFavoriteResponse response = productService.updateFavorite(
+                userId,
+                productId,
+                request.getIsFavorite()
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }
