@@ -80,6 +80,16 @@ public class ProductEntity {
         this.isFavorite = false;
     }
 
+    public void updateProductInfo(String nickname, ProductCategory category) {
+        if (nickname != null) {
+            this.nickname = nickname;
+        }
+
+        if (category != null) {
+            this.category = category;
+        }
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();

@@ -13,6 +13,7 @@ public enum ErrorCode {
     IMAGE_REQUIRED(HttpStatus.BAD_REQUEST, "이미지 파일이 필요합니다."),
     INVALID_SOURCE_TYPE(HttpStatus.BAD_REQUEST, "sourceType이 올바르지 않습니다."),
     REQUIRED_FIELD_MISSING(HttpStatus.BAD_REQUEST, "필수 입력값이 누락되었습니다."),
+    INVALID_PRODUCT_CATEGORY(HttpStatus.BAD_REQUEST, "유효하지 않은 제품 카테고리입니다."),
 
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증 정보가 유효하지 않습니다."),

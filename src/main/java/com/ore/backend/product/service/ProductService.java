@@ -2,10 +2,8 @@ package com.ore.backend.product.service;
 
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
-import com.ore.backend.product.dto.CreateProductRequest;
-import com.ore.backend.product.dto.CreateProductResponse;
-import com.ore.backend.product.dto.GetProductDetailResponse;
-import com.ore.backend.product.dto.GetProductResponse;
+import com.ore.backend.product.dto.*;
+import com.ore.backend.product.entity.ProductCategory;
 import com.ore.backend.productCustomManual.entity.ProductCustomManualEntity;
 import com.ore.backend.product.entity.ProductEntity;
 import com.ore.backend.productImage.entity.ProductImageEntity;
@@ -23,6 +21,7 @@ import com.ore.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -168,5 +167,75 @@ public class ProductService {
                 .map(ProductImageEntity::getImageUrl)
                 .map(s3ImageStorageService::generatePresignedUrl)
                 .orElse(null);
+    }
+
+    // 제품 정보 수정
+    @Transactional
+    public UpdateProductResponse updateProduct(
+            UUID userId,
+            UUID productId,
+            String nickname,
+            MultipartFile image,
+            String categoryValue
+    ) {
+        ProductEntity product = productRepository.findByProductIdAndUser_UserId(productId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        ProductCategory category = parseCategory(categoryValue);
+
+        validateUpdateValue(nickname, image, category);
+
+        product.updateProductInfo(nickname, category);
+
+        if (image != null && !image.isEmpty()) {
+            updateProductImage(product, image);
+        }
+
+        String imageUrl = getProductImageUrl(product.getProductId());
+
+        return UpdateProductResponse.from(product, imageUrl);
+    }
+
+    // 수정값 존재 여부 검증
+    private void validateUpdateValue(
+            String nickname,
+            MultipartFile image,
+            ProductCategory category
+    ) {
+        if ((nickname == null || nickname.isBlank())
+                && (image == null || image.isEmpty())
+                && category == null) {
+            throw new CustomException(ErrorCode.NO_UPDATE_VALUE);
+        }
+    }
+
+    // 카테고리 변환
+    private ProductCategory parseCategory(String categoryValue) {
+        if (categoryValue == null || categoryValue.isBlank()) {
+            return null;
+        }
+
+        try {
+            return ProductCategory.valueOf(categoryValue);
+        } catch (IllegalArgumentException e) {
+            throw new CustomException(ErrorCode.INVALID_PRODUCT_CATEGORY);
+        }
+    }
+
+    // 제품 이미지 저장 또는 교체
+    private void updateProductImage(ProductEntity product, MultipartFile image) {
+        String imageKey = s3ImageStorageService.uploadProductImage(product.getProductId(), image);
+
+        ProductImageEntity productImage = productImageRepository.findByProduct_ProductId(product.getProductId())
+                .map(existingImage -> {
+                    existingImage.updateImageUrl(imageKey);
+                    return existingImage;
+                })
+                .orElseGet(() -> productImageRepository.save(
+                        ProductImageEntity.builder()
+                                .product(product)
+                                .imageUrl(imageKey)
+                                .build()
+                ));
     }
 }

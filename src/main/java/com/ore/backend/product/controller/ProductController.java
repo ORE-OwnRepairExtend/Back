@@ -1,16 +1,15 @@
 package com.ore.backend.product.controller;
 
-import com.ore.backend.product.dto.CreateProductRequest;
-import com.ore.backend.product.dto.CreateProductResponse;
-import com.ore.backend.product.dto.GetProductDetailResponse;
-import com.ore.backend.product.dto.GetProductResponse;
+import com.ore.backend.product.dto.*;
 import com.ore.backend.product.service.ProductService;
 import com.ore.backend.security.JwtProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -59,6 +58,31 @@ public class ProductController {
         UUID userId = jwtProvider.getUserId(accessToken);
 
         GetProductDetailResponse response = productService.getProductDetail(userId, productId);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping(
+            value = "/{productId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<UpdateProductResponse> updateProduct(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID productId,
+            @RequestParam(required = false) String nickname,
+            @RequestPart(required = false) MultipartFile image,
+            @RequestParam(required = false) String category
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        UpdateProductResponse response = productService.updateProduct(
+                userId,
+                productId,
+                nickname,
+                image,
+                category
+        );
 
         return ResponseEntity.ok(response);
     }
