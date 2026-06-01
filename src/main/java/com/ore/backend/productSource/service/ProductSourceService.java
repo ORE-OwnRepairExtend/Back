@@ -24,6 +24,7 @@ public class ProductSourceService {
     private final UserRepository userRepository;
     private final S3ImageStorageService s3ImageStorageService;
 
+    // 제품 입력 데이터 생성
     @Transactional
     public CreateProductSourceResponse createProductSource(
             UUID userId,
@@ -32,8 +33,10 @@ public class ProductSourceService {
     ) {
         validateImage(image);
 
+        // 입력 데이터 유형 변환
         SourceType sourceType = SourceType.from(sourceTypeValue);
 
+        // 사용자 조회
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -47,6 +50,7 @@ public class ProductSourceService {
 
         ProductSourceEntity savedSource = productSourceRepository.save(productSource);
 
+        // 이미지 접근 URL 생성
         String presignedImageUrl = s3ImageStorageService.generatePresignedUrl(savedSource.getImageUrl());
 
         return CreateProductSourceResponse.builder()
@@ -57,6 +61,7 @@ public class ProductSourceService {
                 .build();
     }
 
+    // 이미지 필수 여부 검증
     private void validateImage(MultipartFile image) {
 
         if (image == null || image.isEmpty()) {
@@ -64,8 +69,10 @@ public class ProductSourceService {
         }
     }
 
+    // 제품 입력 데이터 조회
     @Transactional(readOnly = true)
     public GetProductSourceResponse getProductSource(UUID userId, UUID sourceId) {
+        // 사용자 소유 입력 데이터 조회
         ProductSourceEntity productSource = productSourceRepository
                 .findBySourceIdAndUser_UserId(sourceId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_SOURCE_NOT_FOUND));

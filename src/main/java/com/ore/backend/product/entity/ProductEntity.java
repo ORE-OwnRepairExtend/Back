@@ -14,6 +14,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "products")
+@Builder
 public class ProductEntity {
 
     @Id

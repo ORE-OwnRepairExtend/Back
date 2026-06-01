@@ -37,6 +37,19 @@ public class ProductManualEntity {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Builder
+    public ProductManualEntity(
+            ProductModelEntity model,
+            String manualUrl,
+            String manualSummary,
+            String customerCenter
+    ) {
+        this.model = model;
+        this.manualUrl = manualUrl;
+        this.manualSummary = manualSummary;
+        this.customerCenter = customerCenter;
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();

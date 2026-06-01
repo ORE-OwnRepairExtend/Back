@@ -10,8 +10,6 @@ import java.util.UUID;
 @Table(name = "refresh_tokens")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class RefreshTokenEntity {
 
     @Id
@@ -32,6 +30,12 @@ public class RefreshTokenEntity {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Builder
+    public RefreshTokenEntity(UserEntity user, String refreshToken) {
+        this.user = user;
+        this.refreshToken = refreshToken;
+    }
 
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;

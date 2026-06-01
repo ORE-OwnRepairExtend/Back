@@ -11,8 +11,6 @@ import java.util.UUID;
 @Table(name = "product_sources")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class ProductSourceEntity {
 
     @Id
@@ -39,6 +37,21 @@ public class ProductSourceEntity {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Builder
+    public ProductSourceEntity(
+            UserEntity user,
+            String imageUrl,
+            String ocrText,
+            String modelNumber,
+            SourceType sourceType
+    ) {
+        this.user = user;
+        this.imageUrl = imageUrl;
+        this.ocrText = ocrText;
+        this.modelNumber = modelNumber;
+        this.sourceType = sourceType;
+    }
 
     @PrePersist
     protected void onCreate() {

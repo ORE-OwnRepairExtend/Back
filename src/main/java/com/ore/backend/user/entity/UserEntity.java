@@ -10,8 +10,6 @@ import java.util.UUID;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class UserEntity {
 
     @Id
@@ -35,6 +33,14 @@ public class UserEntity {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Builder
+    public UserEntity(String email, String name, String providerId, String profileImage) {
+        this.email = email;
+        this.name = name;
+        this.providerId = providerId;
+        this.profileImage = profileImage;
+    }
 
     // 생성 시 자동 세팅
     @PrePersist
