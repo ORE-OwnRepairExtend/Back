@@ -22,6 +22,7 @@ public class ProductSourceEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
+    // S3 object key 저장
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 

@@ -2,6 +2,7 @@ package com.ore.backend.productSource.service;
 
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
+import com.ore.backend.global.service.S3ImageStorageService;
 import com.ore.backend.productSource.dto.CreateProductSourceResponse;
 import com.ore.backend.productSource.dto.GetProductSourceResponse;
 import com.ore.backend.productSource.entity.ProductSourceEntity;
@@ -40,7 +41,7 @@ public class ProductSourceService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        String imageKey = s3ImageStorageService.upload(image);
+        String imageKey = s3ImageStorageService.uploadProductSourceImage(image);
 
         ProductSourceEntity productSource = ProductSourceEntity.builder()
                 .user(user)

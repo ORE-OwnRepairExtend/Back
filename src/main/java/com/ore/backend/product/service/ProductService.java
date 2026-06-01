@@ -4,9 +4,12 @@ import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
 import com.ore.backend.product.dto.CreateProductRequest;
 import com.ore.backend.product.dto.CreateProductResponse;
+import com.ore.backend.product.dto.GetProductDetailResponse;
 import com.ore.backend.product.dto.GetProductResponse;
 import com.ore.backend.productCustomManual.entity.ProductCustomManualEntity;
 import com.ore.backend.product.entity.ProductEntity;
+import com.ore.backend.productImage.entity.ProductImageEntity;
+import com.ore.backend.productImage.repository.ProductImageRepository;
 import com.ore.backend.productModel.entity.ProductModelEntity;
 import com.ore.backend.productCustomManual.repository.ProductCustomManualRepository;
 import com.ore.backend.productManual.repository.ProductManualRepository;
@@ -14,6 +17,7 @@ import com.ore.backend.productModel.repository.ProductModelRepository;
 import com.ore.backend.product.repository.ProductRepository;
 import com.ore.backend.productSource.entity.ProductSourceEntity;
 import com.ore.backend.productSource.repository.ProductSourceRepository;
+import com.ore.backend.global.service.S3ImageStorageService;
 import com.ore.backend.user.entity.UserEntity;
 import com.ore.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +39,8 @@ public class ProductService {
     private final ProductModelRepository productModelRepository;
     private final ProductManualRepository productManualRepository;
     private final ProductCustomManualRepository productCustomManualRepository;
+    private final S3ImageStorageService s3ImageStorageService;
+    private final ProductImageRepository productImageRepository;
 
     // 제품 등록
     @Transactional
@@ -137,7 +143,30 @@ public class ProductService {
                 : productRepository.findByUser_UserIdOrderByCreatedAtDesc(userId);
 
         return products.stream()
-                .map(GetProductResponse::from)
+                .map(product -> GetProductResponse.from(
+                        product,
+                        getProductImageUrl(product.getProductId()),
+                        false
+                ))
                 .toList();
+    }
+
+    // 제품 상세 조회
+    @Transactional(readOnly = true)
+    public GetProductDetailResponse getProductDetail(UUID userId, UUID productId) {
+        ProductEntity product = productRepository.findByProductIdAndUser_UserId(productId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        String imageUrl = getProductImageUrl(product.getProductId());
+
+        return GetProductDetailResponse.from(product, imageUrl, false);
+    }
+
+    // 제품 이미지 URL 조회
+    private String getProductImageUrl(UUID productId) {
+        return productImageRepository.findByProduct_ProductId(productId)
+                .map(ProductImageEntity::getImageUrl)
+                .map(s3ImageStorageService::generatePresignedUrl)
+                .orElse(null);
     }
 }

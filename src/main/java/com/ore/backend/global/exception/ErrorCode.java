@@ -26,6 +26,7 @@ public enum ErrorCode {
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     PRODUCT_SOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "제품 입력 데이터를 찾을 수 없습니다."),
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "제품을 찾을 수 없습니다."),
 
     // 500
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다."),

@@ -23,15 +23,17 @@ public class GetProductResponse {
     private LocalDate purchaseDate;
     private LocalDateTime createdAt;
 
-    public static GetProductResponse from(ProductEntity product) {
+    public static GetProductResponse from(ProductEntity product,
+                                          String imageUrl,
+                                          boolean hasRepairHistory) {
         return GetProductResponse.builder()
                 .productId(product.getProductId())
                 .name(product.getName())
                 .nickname(product.getNickname())
                 .category(product.getCategory())
-                .imageUrl(product.getSource() != null ? product.getSource().getImageUrl() : null)
+                .imageUrl(imageUrl)
                 .isFavorite(product.getIsFavorite())
-                .hasRepairHistory(false) // repair_histories 테이블 구현하고 계산
+                .hasRepairHistory(hasRepairHistory) // repair_histories 테이블 구현하고 계산
                 .purchaseDate(product.getPurchaseDate())
                 .createdAt(product.getCreatedAt())
                 .build();

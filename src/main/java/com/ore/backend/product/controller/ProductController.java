@@ -2,6 +2,7 @@ package com.ore.backend.product.controller;
 
 import com.ore.backend.product.dto.CreateProductRequest;
 import com.ore.backend.product.dto.CreateProductResponse;
+import com.ore.backend.product.dto.GetProductDetailResponse;
 import com.ore.backend.product.dto.GetProductResponse;
 import com.ore.backend.product.service.ProductService;
 import com.ore.backend.security.JwtProvider;
@@ -45,6 +46,19 @@ public class ProductController {
         UUID userId = jwtProvider.getUserId(accessToken);
 
         List<GetProductResponse> response = productService.getProducts(userId, isFavorite);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{productId}")
+    public ResponseEntity<GetProductDetailResponse> getProductDetail(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID productId
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        GetProductDetailResponse response = productService.getProductDetail(userId, productId);
 
         return ResponseEntity.ok(response);
     }

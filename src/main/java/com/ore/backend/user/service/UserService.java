@@ -20,9 +20,8 @@ import com.ore.backend.user.dto.GetMyInfoResponse;
 import com.ore.backend.user.dto.UpdateMyInfoResponse;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.ore.backend.productSource.service.S3ImageStorageService;
+import com.ore.backend.global.service.S3ImageStorageService;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -53,7 +52,6 @@ public class UserService {
                                 .name(googleUser.getName())
                                 .providerId(googleUser.getProviderId())
                                 .profileImage(googleUser.getProfileImage())
-                                .createdAt(LocalDateTime.now())
                                 .build()
                 ));
 
