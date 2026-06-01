@@ -117,4 +117,17 @@ public class ProductController {
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Void> deleteProduct(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID productId
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        productService.deleteProduct(userId, productId);
+
+        return ResponseEntity.noContent().build();
+    }
 }

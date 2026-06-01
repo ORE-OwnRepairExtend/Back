@@ -291,4 +291,20 @@ public class ProductService {
             throw new CustomException(ErrorCode.WARRANTY_INFO_MISSING);
         }
     }
+
+    // 제품 삭제
+    @Transactional
+    public void deleteProduct(UUID userId, UUID productId) {
+        ProductEntity product = productRepository.findByProductIdAndUser_UserId(productId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 제품 이미지 삭제
+        productImageRepository.deleteByProduct_ProductId(productId);
+
+        // 사용자 입력 매뉴얼 삭제
+        productCustomManualRepository.deleteByProduct_ProductId(productId);
+
+        // 제품 삭제
+        productRepository.delete(product);
+    }
 }
