@@ -1,4 +1,4 @@
-package com.ore.backend.productSource.service;
+package com.ore.backend.global.service;
 
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
@@ -27,12 +27,19 @@ public class S3ImageStorageService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public String upload(MultipartFile image) {
+    // OCR/AI 입력 이미지 업로드
+    public String uploadProductSourceImage(MultipartFile image) {
         return upload(image, "product-sources");
     }
 
+    // 사용자 프로필 이미지 업로드
     public String uploadProfileImage(UUID userId, MultipartFile image) {
         return upload(image, "profile-images/" + userId);
+    }
+
+    // 제품 대표 이미지 업로드
+    public String uploadProductImage(UUID productId, MultipartFile image) {
+        return upload(image, "product-images/" + productId);
     }
 
     private String upload(MultipartFile image, String dirName) {
@@ -52,7 +59,7 @@ public class S3ImageStorageService {
                     RequestBody.fromBytes(image.getBytes())
             );
 
-            // 중요: URL이 아니라 S3 object key 반환
+            // S3에 저장된 이미지 경로 반환
             return key;
 
         } catch (IOException e) {
@@ -65,7 +72,7 @@ public class S3ImageStorageService {
             return null;
         }
 
-        // 이미 URL이 저장된 기존 데이터 대응용
+        // 기존에 URL로 저장된 데이터 대응
         String objectKey = extractKeyIfUrl(key);
 
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()

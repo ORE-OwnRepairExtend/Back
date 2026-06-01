@@ -3,8 +3,6 @@ package com.ore.backend.productSource.entity;
 import com.ore.backend.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -13,20 +11,18 @@ import java.util.UUID;
 @Table(name = "product_sources")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class ProductSourceEntity {
 
     @Id
     @GeneratedValue
-    @JdbcType(BinaryJdbcType.class)
-    @Column(name = "source_id", nullable = false)
+    @Column(name = "source_id", nullable = false, updatable = false)
     private UUID sourceId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
+    // S3 object key 저장
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
@@ -42,6 +38,21 @@ public class ProductSourceEntity {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Builder
+    public ProductSourceEntity(
+            UserEntity user,
+            String imageUrl,
+            String ocrText,
+            String modelNumber,
+            SourceType sourceType
+    ) {
+        this.user = user;
+        this.imageUrl = imageUrl;
+        this.ocrText = ocrText;
+        this.modelNumber = modelNumber;
+        this.sourceType = sourceType;
+    }
 
     @PrePersist
     protected void onCreate() {

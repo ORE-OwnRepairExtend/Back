@@ -2,8 +2,6 @@ package com.ore.backend.user.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.type.descriptor.jdbc.BinaryJdbcType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -12,14 +10,11 @@ import java.util.UUID;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
 public class UserEntity {
 
     @Id
     @GeneratedValue
-    @JdbcType(BinaryJdbcType.class)
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = false, updatable = false)
     private UUID userId;
 
     @Column(name = "email", nullable = false, unique = true)
@@ -38,6 +33,14 @@ public class UserEntity {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Builder
+    public UserEntity(String email, String name, String providerId, String profileImage) {
+        this.email = email;
+        this.name = name;
+        this.providerId = providerId;
+        this.profileImage = profileImage;
+    }
 
     // 생성 시 자동 세팅
     @PrePersist
