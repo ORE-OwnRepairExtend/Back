@@ -104,4 +104,17 @@ public class ProductController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/{productId}/warranty")
+    public ResponseEntity<GetProductWarrantyResponse> getProductWarranty(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID productId
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        GetProductWarrantyResponse response = productService.getProductWarranty(userId, productId);
+
+        return ResponseEntity.ok(response);
+    }
 }

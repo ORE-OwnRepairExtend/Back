@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -252,5 +254,41 @@ public class ProductService {
         product.updateFavorite(isFavorite);
 
         return UpdateProductFavoriteResponse.from(product);
+    }
+
+    // 제품 보증기간 조회
+    @Transactional(readOnly = true)
+    public GetProductWarrantyResponse getProductWarranty(UUID userId, UUID productId) {
+        ProductEntity product = productRepository.findByProductIdAndUser_UserId(productId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 보증기간 계산에 필요한 구매일, 보증 개월 수 존재 여부 검증
+        validateWarrantyInfo(product);
+
+        LocalDate purchaseDate = product.getPurchaseDate();
+        Integer warrantyMonths = product.getWarrantyMonth();
+
+        // 보증 만료일 계산: 구매일 + 보증 개월 수
+        LocalDate warrantyEndDate = purchaseDate.plusMonths(warrantyMonths);
+
+        // 오늘 날짜 기준으로 보증 만료일까지 남은 일수 계산
+        // 이미 만료된 경우 음수 값이 나올 수 있음
+        long remainingDays = ChronoUnit.DAYS.between(LocalDate.now(), warrantyEndDate);
+
+        return GetProductWarrantyResponse.builder()
+                .productId(product.getProductId())
+                .purchaseDate(purchaseDate)
+                .warrantyMonths(warrantyMonths)
+                .warrantyEndDate(warrantyEndDate)
+                .remainingDays(remainingDays)
+                .build();
+    }
+
+    // 보증기간 계산 정보 검증
+    private void validateWarrantyInfo(ProductEntity product) {
+        // 구매일 또는 보증 개월 수가 없으면 보증기간 계산 불가
+        if (product.getPurchaseDate() == null || product.getWarrantyMonth() == null) {
+            throw new CustomException(ErrorCode.WARRANTY_INFO_MISSING);
+        }
     }
 }
