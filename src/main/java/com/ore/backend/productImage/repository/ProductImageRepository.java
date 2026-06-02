@@ -11,4 +11,6 @@ public interface ProductImageRepository extends JpaRepository<ProductImageEntity
     Optional<ProductImageEntity> findByProduct_ProductId(UUID productId);
 
     void deleteByProduct_ProductId(UUID productId);
+
+    boolean existsByProduct_ProductId(UUID productId);
 }
