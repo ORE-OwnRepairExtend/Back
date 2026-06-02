@@ -15,6 +15,7 @@ public class ProductImageResponse {
     private String imageUrl;
     private Boolean isPrimary;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static ProductImageResponse of(ProductImageEntity productImage, String imageUrl) {
         return ProductImageResponse.builder()
@@ -22,6 +23,7 @@ public class ProductImageResponse {
                 .imageUrl(imageUrl)
                 .isPrimary(productImage.getIsPrimary())
                 .createdAt(productImage.getCreatedAt())
+                .updatedAt(productImage.getUpdatedAt())
                 .build();
     }
 }
