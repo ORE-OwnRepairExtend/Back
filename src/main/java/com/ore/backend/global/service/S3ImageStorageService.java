@@ -6,10 +6,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
@@ -43,6 +45,16 @@ public class S3ImageStorageService {
     }
 
     private String upload(MultipartFile image, String dirName) {
+        if (image == null || image.isEmpty()) {
+            throw new CustomException(ErrorCode.IMAGE_REQUIRED);
+        }
+
+        String contentType = image.getContentType();
+
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new CustomException(ErrorCode.INVALID_IMAGE_FILE);
+        }
+
         try {
             String originalFilename = image.getOriginalFilename();
             String extension = getExtension(originalFilename);
@@ -72,23 +84,28 @@ public class S3ImageStorageService {
             return null;
         }
 
-        // 기존에 URL로 저장된 데이터 대응
-        String objectKey = extractKeyIfUrl(key);
+        try {
+            // 기존에 URL로 저장된 데이터 대응
+            String objectKey = extractKeyIfUrl(key);
 
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(objectKey)
                 .build();
 
-        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofMinutes(10))
                 .getObjectRequest(getObjectRequest)
                 .build();
 
-        return s3Presigner.presignGetObject(presignRequest)
+            return s3Presigner.presignGetObject(presignRequest)
                 .url()
                 .toString();
+
+        } catch (S3Exception | SdkClientException e) {
+            throw new CustomException(ErrorCode.IMAGE_URL_GENERATION_FAILED);
     }
+}
 
     private String extractKeyIfUrl(String value) {
         if (!value.startsWith("http")) {
