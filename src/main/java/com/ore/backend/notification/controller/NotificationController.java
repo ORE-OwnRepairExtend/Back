@@ -1,6 +1,7 @@
 package com.ore.backend.notification.controller;
 
 import com.ore.backend.notification.dto.GetNotificationResponse;
+import com.ore.backend.notification.dto.NotificationUnreadCountResponse;
 import com.ore.backend.notification.service.NotificationService;
 import com.ore.backend.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,15 @@ public class NotificationController {
         UUID userId = jwtProvider.getUserId(accessToken);
 
         return notificationService.getNotifications(userId);
+    }
+
+    @GetMapping("/unread-count")
+    public NotificationUnreadCountResponse getUnreadCount(
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        return notificationService.getUnreadCount(userId);
     }
 }

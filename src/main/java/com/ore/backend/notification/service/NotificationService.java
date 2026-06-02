@@ -1,6 +1,7 @@
 package com.ore.backend.notification.service;
 
 import com.ore.backend.notification.dto.GetNotificationResponse;
+import com.ore.backend.notification.dto.NotificationUnreadCountResponse;
 import com.ore.backend.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,5 +26,14 @@ public class NotificationService {
                 .stream()
                 .map(GetNotificationResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public NotificationUnreadCountResponse getUnreadCount(UUID userId) {
+        notificationGenerateService.generateNotifications(userId);
+
+        long unreadCount = notificationRepository.countByUser_UserIdAndIsReadFalse(userId);
+
+        return NotificationUnreadCountResponse.from(unreadCount);
     }
 }
