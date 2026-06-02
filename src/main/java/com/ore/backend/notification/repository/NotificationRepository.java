@@ -33,4 +33,6 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
             UUID notificationId,
             UUID userId
     );
+
+    List<NotificationEntity> findByUser_UserIdAndIsReadFalse(UUID userId);
 }

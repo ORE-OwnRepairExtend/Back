@@ -4,6 +4,7 @@ import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
 import com.ore.backend.notification.dto.GetNotificationResponse;
 import com.ore.backend.notification.dto.NotificationUnreadCountResponse;
+import com.ore.backend.notification.dto.UpdateAllNotificationsReadResponse;
 import com.ore.backend.notification.dto.UpdateNotificationReadResponse;
 import com.ore.backend.notification.entity.NotificationEntity;
 import com.ore.backend.notification.repository.NotificationRepository;
@@ -22,6 +23,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final NotificationGenerateService notificationGenerateService;
 
+    // 알림 목록 조회
     @Transactional
     public List<GetNotificationResponse> getNotifications(UUID userId) {
         notificationGenerateService.generateNotifications(userId);
@@ -32,6 +34,7 @@ public class NotificationService {
                 .toList();
     }
 
+    // 안 읽은 알림 개수 조회
     @Transactional
     public NotificationUnreadCountResponse getUnreadCount(UUID userId) {
         notificationGenerateService.generateNotifications(userId);
@@ -41,6 +44,7 @@ public class NotificationService {
         return NotificationUnreadCountResponse.from(unreadCount);
     }
 
+    // 개별 알림 읽음 처리
     @Transactional
     public UpdateNotificationReadResponse updateRead(
             UUID userId,
@@ -53,5 +57,17 @@ public class NotificationService {
         notification.updateRead();
 
         return UpdateNotificationReadResponse.from(notification);
+    }
+
+    // 전체 알림 읽음 처리
+    @Transactional
+    public UpdateAllNotificationsReadResponse updateAllRead(UUID userId) {
+        // 안 읽은 알림 조회
+        List<NotificationEntity> unreadNotifications =
+                notificationRepository.findByUser_UserIdAndIsReadFalse(userId);
+
+        unreadNotifications.forEach(NotificationEntity::updateRead);
+
+        return UpdateAllNotificationsReadResponse.from(unreadNotifications.size());
     }
 }
