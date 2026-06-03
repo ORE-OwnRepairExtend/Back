@@ -1,4 +1,4 @@
-package com.ore.backend.productCustomManual.entity;
+package com.ore.backend.productUserManual.entity;
 
 import com.ore.backend.product.entity.ProductEntity;
 import jakarta.persistence.*;
@@ -11,20 +11,20 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
-        name = "product_custom_manuals",
+        name = "product_user_manuals",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_product_custom_manuals_product_id",
+                        name = "uk_product_user_manuals_product_id",
                         columnNames = "product_id"
                 )
         }
 )
-public class ProductCustomManualEntity {
+public class ProductUserManualEntity {
 
     @Id
     @GeneratedValue
-    @Column(name = "custom_manual_id", nullable = false, updatable = false)
-    private UUID customManualId;
+    @Column(name = "user_manual_id", nullable = false, updatable = false)
+    private UUID userManualId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
@@ -40,7 +40,7 @@ public class ProductCustomManualEntity {
     private LocalDateTime updatedAt;
 
     @Builder
-    public ProductCustomManualEntity(ProductEntity product, String manualContent) {
+    public ProductUserManualEntity(ProductEntity product, String manualContent) {
         this.product = product;
         this.manualContent = manualContent;
     }

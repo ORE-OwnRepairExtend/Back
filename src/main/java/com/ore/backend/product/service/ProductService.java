@@ -4,12 +4,12 @@ import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
 import com.ore.backend.product.dto.*;
 import com.ore.backend.product.entity.ProductCategory;
-import com.ore.backend.productCustomManual.entity.ProductCustomManualEntity;
+import com.ore.backend.productUserManual.entity.ProductUserManualEntity;
 import com.ore.backend.product.entity.ProductEntity;
 import com.ore.backend.productImage.entity.ProductImageEntity;
 import com.ore.backend.productImage.repository.ProductImageRepository;
 import com.ore.backend.productModel.entity.ProductModelEntity;
-import com.ore.backend.productCustomManual.repository.ProductCustomManualRepository;
+import com.ore.backend.productUserManual.repository.ProductUserManualRepository;
 import com.ore.backend.productManual.repository.ProductManualRepository;
 import com.ore.backend.productModel.repository.ProductModelRepository;
 import com.ore.backend.product.repository.ProductRepository;
@@ -23,8 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,7 +37,7 @@ public class ProductService {
     private final ProductSourceRepository productSourceRepository;
     private final ProductModelRepository productModelRepository;
     private final ProductManualRepository productManualRepository;
-    private final ProductCustomManualRepository productCustomManualRepository;
+    private final ProductUserManualRepository productUserManualRepository;
     private final S3ImageStorageService s3ImageStorageService;
     private final ProductImageRepository productImageRepository;
     private final ProductWarrantyCalculator productWarrantyCalculator;
@@ -84,12 +82,12 @@ public class ProductService {
 
         // 사용자 입력 매뉴얼 저장
         if (request.hasManual()) {
-            ProductCustomManualEntity customManual = ProductCustomManualEntity.builder()
+            ProductUserManualEntity userManual = ProductUserManualEntity.builder()
                     .product(savedProduct)
                     .manualContent(request.getManual().getManualContent())
                     .build();
 
-            productCustomManualRepository.save(customManual);
+            productUserManualRepository.save(userManual);
         }
 
         return CreateProductResponse.from(savedProduct);
@@ -293,7 +291,7 @@ public class ProductService {
         productImageRepository.deleteByProduct_ProductId(productId);
 
         // 사용자 입력 매뉴얼 삭제
-        productCustomManualRepository.deleteByProduct_ProductId(productId);
+        productUserManualRepository.deleteByProduct_ProductId(productId);
 
         // 제품 삭제
         productRepository.delete(product);
