@@ -117,4 +117,18 @@ public class RepairHistoryController {
 
         return ResponseEntity.noContent().build();
     }
+
+    @DeleteMapping("/{repairId}")
+    public ResponseEntity<Void> deleteRepairHistory(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID productId,
+            @PathVariable UUID repairId
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        repairHistoryService.deleteRepairHistory(userId, productId, repairId);
+
+        return ResponseEntity.noContent().build();
+    }
 }
