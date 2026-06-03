@@ -2,6 +2,7 @@ package com.ore.backend.repairReminder.service;
 
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
+import com.ore.backend.notification.repository.NotificationRepository;
 import com.ore.backend.product.entity.ProductEntity;
 import com.ore.backend.product.repository.ProductRepository;
 import com.ore.backend.repairHistory.entity.RepairHistoryEntity;
@@ -25,6 +26,7 @@ public class RepairReminderService {
     private final ProductRepository productRepository;
     private final RepairHistoryRepository repairHistoryRepository;
     private final RepairReminderRepository repairReminderRepository;
+    private final NotificationRepository notificationRepository;
 
     // 수리 예정 알림 등록
     @Transactional
@@ -179,6 +181,7 @@ public class RepairReminderService {
         return UpdateRepairReminderDoneResponse.from(reminder);
     }
 
+    // 요청값 검증
     private void validateDoneRequest(UpdateRepairReminderDoneRequest request) {
         if (request == null || request.getIsDone() == null) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
@@ -187,5 +190,24 @@ public class RepairReminderService {
         if (request.getIsDone() && request.getCompletedDate() == null) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
         }
+    }
+
+    // 관리/수리 예정 삭제
+    @Transactional
+    public void deleteRepairReminder(
+            UUID userId,
+            UUID productId,
+            UUID reminderId
+    ) {
+        RepairReminderEntity reminder = repairReminderRepository
+                .findByReminderIdAndProduct_ProductIdAndProduct_User_UserId(
+                        reminderId,
+                        productId,
+                        userId
+                )
+                .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_REMINDER_NOT_FOUND));
+
+        notificationRepository.deleteByReminder_ReminderId(reminderId);
+        repairReminderRepository.delete(reminder);
     }
 }

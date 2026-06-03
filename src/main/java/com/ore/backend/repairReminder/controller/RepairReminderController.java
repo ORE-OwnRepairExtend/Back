@@ -4,6 +4,7 @@ import com.ore.backend.repairReminder.dto.*;
 import com.ore.backend.repairReminder.service.RepairReminderService;
 import com.ore.backend.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -87,5 +88,23 @@ public class RepairReminderController {
                 reminderId,
                 request
         );
+    }
+
+    @DeleteMapping("/products/{productId}/repair-reminders/{reminderId}")
+    public ResponseEntity<Void> deleteRepairReminder(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID productId,
+            @PathVariable UUID reminderId
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        repairReminderService.deleteRepairReminder(
+                userId,
+                productId,
+                reminderId
+        );
+
+        return ResponseEntity.noContent().build();
     }
 }
