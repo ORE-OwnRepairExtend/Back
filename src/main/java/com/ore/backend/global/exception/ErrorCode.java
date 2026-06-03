@@ -30,6 +30,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     PRODUCT_SOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "제품 입력 데이터를 찾을 수 없습니다."),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "제품을 찾을 수 없습니다."),
+    REPAIR_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "수리 이력을 찾을 수 없습니다."),
 
     // 404
     IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "등록된 제품 이미지가 없습니다."),

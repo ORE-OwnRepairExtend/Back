@@ -40,6 +40,11 @@ public class S3ImageStorageService {
         return upload(image, "profile-images/" + userId);
     }
 
+    // 수리 이력 이미지 업로드
+    public String uploadRepairHistoryImage(UUID productId, MultipartFile image) {
+        return upload(image, "repair-histories/" + productId);
+    }
+
     // 제품 대표 이미지 업로드
     public String uploadProductImage(UUID productId, MultipartFile image) {
         return upload(image, "product-images/" + productId);
@@ -64,7 +69,7 @@ public class S3ImageStorageService {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucket)
                     .key(key)
-                    .contentType(image.getContentType())
+                    .contentType(contentType)
                     .build();
 
             s3Client.putObject(
@@ -72,10 +77,9 @@ public class S3ImageStorageService {
                     RequestBody.fromBytes(image.getBytes())
             );
 
-            // S3에 저장된 이미지 경로 반환
             return key;
 
-        } catch (IOException e) {
+        } catch (IOException | S3Exception | SdkClientException e) {
             throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);
         }
     }
