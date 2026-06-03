@@ -15,4 +15,10 @@ public interface RepairHistoryRepository extends JpaRepository<RepairHistoryEnti
             UUID repairId,
             UUID userId
     );
+
+    Optional<RepairHistoryEntity> findByRepairIdAndProduct_ProductIdAndProduct_User_UserId(
+            UUID repairId,
+            UUID productId,
+            UUID userId
+    );
 }

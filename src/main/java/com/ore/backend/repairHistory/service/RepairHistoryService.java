@@ -225,4 +225,25 @@ public class RepairHistoryService {
 
         repairHistory.deleteImage();
     }
+
+    // 수리 이력 삭제
+    @Transactional
+    public void deleteRepairHistory(UUID userId, UUID productId, UUID repairId) {
+        RepairHistoryEntity repairHistory = repairHistoryRepository
+                .findByRepairIdAndProduct_ProductIdAndProduct_User_UserId(
+                        repairId,
+                        productId,
+                        userId
+                )
+                .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_HISTORY_NOT_FOUND));
+
+        String imageKey = repairHistory.getImageUrl();
+
+        // 이미지 있으면 함께 삭제
+        if (imageKey != null && !imageKey.isBlank()) {
+            s3ImageStorageService.deleteImage(imageKey);
+        }
+
+        repairHistoryRepository.delete(repairHistory);
+    }
 }
