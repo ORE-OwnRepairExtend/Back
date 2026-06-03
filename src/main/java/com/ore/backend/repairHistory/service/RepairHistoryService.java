@@ -88,6 +88,8 @@ public class RepairHistoryService {
         if (cost < 0) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
         }
+
+        validateRepairDate(date);
     }
 
     // 이미지 업로드
@@ -205,6 +207,15 @@ public class RepairHistoryService {
 
         if (cost != null && cost < 0) {
             throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+
+        validateRepairDate(date);
+    }
+
+    // 수리일 검증
+    private void validateRepairDate(LocalDate date) {
+        if (date != null && date.isAfter(LocalDate.now())) {
+            throw new CustomException(ErrorCode.INVALID_REPAIR_DATE);
         }
     }
 
