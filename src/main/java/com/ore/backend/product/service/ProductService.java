@@ -145,11 +145,20 @@ public class ProductService {
                 : productRepository.findByUser_UserIdOrderByCreatedAtDesc(userId);
 
         return products.stream()
-                .map(product -> GetProductResponse.from(
-                        product,
-                        getProductImageUrl(product.getProductId()),
-                        false
-                ))
+                .map(product -> {
+                    Long remainingDays = null;
+
+                    if (productWarrantyCalculator.canCalculate(product)) {
+                        remainingDays = productWarrantyCalculator.calculate(product).getRemainingDays();
+                    }
+
+                    return GetProductResponse.from(
+                            product,
+                            getProductImageUrl(product.getProductId()),
+                            false,
+                            remainingDays
+                    );
+                })
                 .toList();
     }
 

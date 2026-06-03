@@ -21,11 +21,13 @@ public class GetProductResponse {
     private Boolean isFavorite;
     private Boolean hasRepairHistory;
     private LocalDate purchaseDate;
+    private Long remainingDays;
     private LocalDateTime createdAt;
 
     public static GetProductResponse from(ProductEntity product,
                                           String imageUrl,
-                                          boolean hasRepairHistory) {
+                                          boolean hasRepairHistory,
+                                          Long remainingDays) {
         return GetProductResponse.builder()
                 .productId(product.getProductId())
                 .name(product.getName())
@@ -35,6 +37,7 @@ public class GetProductResponse {
                 .isFavorite(product.getIsFavorite())
                 .hasRepairHistory(hasRepairHistory) // repair_histories 테이블 구현하고 계산
                 .purchaseDate(product.getPurchaseDate())
+                .remainingDays(remainingDays)
                 .createdAt(product.getCreatedAt())
                 .build();
     }
