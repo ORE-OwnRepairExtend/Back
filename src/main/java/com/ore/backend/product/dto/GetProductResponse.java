@@ -35,7 +35,7 @@ public class GetProductResponse {
                 .category(product.getCategory())
                 .imageUrl(imageUrl)
                 .isFavorite(product.getIsFavorite())
-                .hasRepairHistory(hasRepairHistory) // repair_histories 테이블 구현하고 계산
+                .hasRepairHistory(hasRepairHistory)
                 .purchaseDate(product.getPurchaseDate())
                 .remainingDays(remainingDays)
                 .createdAt(product.getCreatedAt())
