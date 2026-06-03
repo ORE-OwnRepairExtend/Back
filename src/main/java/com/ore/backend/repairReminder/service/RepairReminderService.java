@@ -8,6 +8,8 @@ import com.ore.backend.repairHistory.entity.RepairHistoryEntity;
 import com.ore.backend.repairHistory.repository.RepairHistoryRepository;
 import com.ore.backend.repairReminder.dto.CreateRepairReminderRequest;
 import com.ore.backend.repairReminder.dto.CreateRepairReminderResponse;
+import com.ore.backend.repairReminder.dto.GetProductRepairReminderResponse;
+import com.ore.backend.repairReminder.dto.GetRepairReminderResponse;
 import com.ore.backend.repairReminder.entity.RepairReminderEntity;
 import com.ore.backend.repairReminder.repository.RepairReminderRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -84,5 +87,29 @@ public class RepairReminderService {
                         userId
                 )
                 .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_HISTORY_NOT_FOUND));
+    }
+
+    // 사용자의 전체 수리/관리 예정 목록 조회
+    public List<GetRepairReminderResponse> getRepairReminders(UUID userId) {
+        return repairReminderRepository
+                .findByProduct_User_UserIdOrderByRemindAtAscCreatedAtDesc(userId)
+                .stream()
+                .map(GetRepairReminderResponse::from)
+                .toList();
+    }
+
+    // 특정 제품의 수리/관리 예정 목록 조회
+    public List<GetProductRepairReminderResponse> getProductRepairReminders(
+            UUID userId,
+            UUID productId
+    ) {
+        productRepository.findByProductIdAndUser_UserId(productId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        return repairReminderRepository
+                .findByProduct_ProductIdOrderByRemindAtAscCreatedAtDesc(productId)
+                .stream()
+                .map(GetProductRepairReminderResponse::from)
+                .toList();
     }
 }
