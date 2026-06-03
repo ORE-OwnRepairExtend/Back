@@ -80,7 +80,7 @@ public class ProductService {
 
         ProductEntity savedProduct = productRepository.save(product);
 
-        // 사용자 입력 매뉴얼 저장
+        // 사용자가 확인/수정 후 최종 확정한 제품별 매뉴얼 저장
         if (request.hasManual()) {
             ProductUserManualEntity userManual = ProductUserManualEntity.builder()
                     .product(savedProduct)
@@ -168,7 +168,16 @@ public class ProductService {
 
         String imageUrl = getProductImageUrl(product.getProductId());
 
-        return GetProductDetailResponse.from(product, imageUrl, false);
+        ProductUserManualInfo manual = getProductUserManualInfo(product.getProductId());
+
+        return GetProductDetailResponse.from(product, imageUrl, false, manual);
+    }
+
+    // 사용자가 최종 확정한 제품별 매뉴얼 조회
+    private ProductUserManualInfo getProductUserManualInfo(UUID productId) {
+        return productUserManualRepository.findByProduct_ProductId(productId)
+                .map(ProductUserManualInfo::from)
+                .orElse(null);
     }
 
     // 제품 이미지 URL 조회

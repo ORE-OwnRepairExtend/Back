@@ -23,12 +23,14 @@ public class GetProductDetailResponse {
     private Integer warrantyMonths;
     private Boolean isFavorite;
     private Boolean hasRepairHistory;
+    private ProductUserManualInfo manual;
     private LocalDateTime createdAt;
 
     public static GetProductDetailResponse from(
             ProductEntity product,
             String imageUrl,
-            boolean hasRepairHistory
+            boolean hasRepairHistory,
+            ProductUserManualInfo manual
     ) {
         return GetProductDetailResponse.builder()
                 .productId(product.getProductId())
@@ -41,6 +43,7 @@ public class GetProductDetailResponse {
                 .warrantyMonths(product.getWarrantyMonth())
                 .isFavorite(product.getIsFavorite())
                 .hasRepairHistory(false) // repair_histories 테이블 구현하고 계산
+                .manual(manual)
                 .createdAt(product.getCreatedAt())
                 .build();
     }
