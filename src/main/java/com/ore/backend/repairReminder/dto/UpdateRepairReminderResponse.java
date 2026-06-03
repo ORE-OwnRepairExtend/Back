@@ -16,7 +16,7 @@ public class UpdateRepairReminderResponse {
     private String title;
     private LocalDate remindAt;
     private Boolean isDone;
-    private LocalDateTime completedAt;
+    private LocalDate completedDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -26,7 +26,7 @@ public class UpdateRepairReminderResponse {
                 .title(reminder.getTitle())
                 .remindAt(reminder.getRemindAt())
                 .isDone(reminder.getIsDone())
-                .completedAt(reminder.getCompletedAt())
+                .completedDate(reminder.getCompletedDate())
                 .createdAt(reminder.getCreatedAt())
                 .updatedAt(reminder.getUpdatedAt())
                 .build();

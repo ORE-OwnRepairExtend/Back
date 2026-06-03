@@ -70,4 +70,22 @@ public class RepairReminderController {
                 request
         );
     }
+
+    @PatchMapping("/products/{productId}/repair-reminders/{reminderId}/done")
+    public UpdateRepairReminderDoneResponse updateRepairReminderDone(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID productId,
+            @PathVariable UUID reminderId,
+            @RequestBody UpdateRepairReminderDoneRequest request
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        return repairReminderService.updateRepairReminderDone(
+                userId,
+                productId,
+                reminderId,
+                request
+        );
+    }
 }

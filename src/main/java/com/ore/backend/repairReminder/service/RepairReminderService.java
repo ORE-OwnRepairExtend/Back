@@ -151,4 +151,41 @@ public class RepairReminderService {
             throw new CustomException(ErrorCode.INVALID_REMIND_DATE);
         }
     }
+
+    // 수리 예정 완료/미완료 처리
+    @Transactional
+    public UpdateRepairReminderDoneResponse updateRepairReminderDone(
+            UUID userId,
+            UUID productId,
+            UUID reminderId,
+            UpdateRepairReminderDoneRequest request
+    ) {
+        validateDoneRequest(request);
+
+        RepairReminderEntity reminder = repairReminderRepository
+                .findByReminderIdAndProduct_ProductIdAndProduct_User_UserId(
+                        reminderId,
+                        productId,
+                        userId
+                )
+                .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_REMINDER_NOT_FOUND));
+
+        if (request.getIsDone()) {
+            reminder.complete(request.getCompletedDate());
+        } else {
+            reminder.cancelComplete();
+        }
+
+        return UpdateRepairReminderDoneResponse.from(reminder);
+    }
+
+    private void validateDoneRequest(UpdateRepairReminderDoneRequest request) {
+        if (request == null || request.getIsDone() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+
+        if (request.getIsDone() && request.getCompletedDate() == null) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+    }
 }

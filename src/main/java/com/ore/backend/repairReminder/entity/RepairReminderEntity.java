@@ -40,8 +40,8 @@ public class RepairReminderEntity {
     @Column(name = "is_done", nullable = false)
     private Boolean isDone = false;
 
-    @Column(name = "completed_at")
-    private LocalDateTime completedAt;
+    @Column(name = "completed_date")
+    private LocalDate completedDate;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -74,14 +74,14 @@ public class RepairReminderEntity {
         }
     }
 
-    public void complete() {
+    public void complete(LocalDate completedDate) {
         this.isDone = true;
-        this.completedAt = LocalDateTime.now();
+        this.completedDate = completedDate;
     }
 
     public void cancelComplete() {
         this.isDone = false;
-        this.completedAt = null;
+        this.completedDate = null;
     }
 
     @PrePersist
