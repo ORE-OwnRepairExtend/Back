@@ -6,10 +6,7 @@ import com.ore.backend.product.entity.ProductEntity;
 import com.ore.backend.product.repository.ProductRepository;
 import com.ore.backend.repairHistory.entity.RepairHistoryEntity;
 import com.ore.backend.repairHistory.repository.RepairHistoryRepository;
-import com.ore.backend.repairReminder.dto.CreateRepairReminderRequest;
-import com.ore.backend.repairReminder.dto.CreateRepairReminderResponse;
-import com.ore.backend.repairReminder.dto.GetProductRepairReminderResponse;
-import com.ore.backend.repairReminder.dto.GetRepairReminderResponse;
+import com.ore.backend.repairReminder.dto.*;
 import com.ore.backend.repairReminder.entity.RepairReminderEntity;
 import com.ore.backend.repairReminder.repository.RepairReminderRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +26,7 @@ public class RepairReminderService {
     private final RepairHistoryRepository repairHistoryRepository;
     private final RepairReminderRepository repairReminderRepository;
 
-    // 수리/관리 예정 알림 등록
+    // 수리 예정 알림 등록
     @Transactional
     public CreateRepairReminderResponse createRepairReminder(
             UUID userId,
@@ -89,7 +86,7 @@ public class RepairReminderService {
                 .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_HISTORY_NOT_FOUND));
     }
 
-    // 사용자의 전체 수리/관리 예정 목록 조회
+    // 사용자의 전체 수리 예정 목록 조회
     public List<GetRepairReminderResponse> getRepairReminders(UUID userId) {
         return repairReminderRepository
                 .findByProduct_User_UserIdOrderByRemindAtAscCreatedAtDesc(userId)
@@ -98,7 +95,7 @@ public class RepairReminderService {
                 .toList();
     }
 
-    // 특정 제품의 수리/관리 예정 목록 조회
+    // 특정 제품의 수리 예정 목록 조회
     public List<GetProductRepairReminderResponse> getProductRepairReminders(
             UUID userId,
             UUID productId
@@ -111,5 +108,47 @@ public class RepairReminderService {
                 .stream()
                 .map(GetProductRepairReminderResponse::from)
                 .toList();
+    }
+
+    // 수리 예정 정보 수정
+    @Transactional
+    public UpdateRepairReminderResponse updateRepairReminder(
+            UUID userId,
+            UUID productId,
+            UUID reminderId,
+            UpdateRepairReminderRequest request
+    ) {
+        validateUpdateValue(request);
+
+        RepairReminderEntity reminder = repairReminderRepository
+                .findByReminderIdAndProduct_ProductIdAndProduct_User_UserId(
+                        reminderId,
+                        productId,
+                        userId
+                )
+                .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_REMINDER_NOT_FOUND));
+
+        reminder.updateReminderInfo(
+                request.getTitle(),
+                request.getRemindAt()
+        );
+
+        return UpdateRepairReminderResponse.from(reminder);
+    }
+
+    // 수정값 검증
+    private void validateUpdateValue(UpdateRepairReminderRequest request) {
+        if (request == null || !request.hasUpdateValue()) {
+            throw new CustomException(ErrorCode.NO_UPDATE_VALUE);
+        }
+
+        if (request.getTitle() != null && request.getTitle().isBlank()) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+
+        if (request.getRemindAt() != null
+                && !request.getRemindAt().isAfter(LocalDate.now())) {
+            throw new CustomException(ErrorCode.INVALID_REMIND_DATE);
+        }
     }
 }

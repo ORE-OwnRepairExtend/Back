@@ -45,7 +45,7 @@ public class NotificationGenerateService {
         }
     }
 
-    // 완료되지 않은 수리/관리 리마인더 알림 생성
+    // 완료되지 않은 수리 리마인더 알림 생성
     private void generateRepairNotifications(UUID userId) {
         List<RepairReminderEntity> reminders =
                 repairReminderRepository.findByProduct_User_UserIdAndIsDoneFalse(userId);

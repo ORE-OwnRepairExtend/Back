@@ -54,7 +54,7 @@ public class NotificationCreateService {
         notificationRepository.save(notification);
     }
 
-    // 수리/관리 리마인더 알림 생성
+    // 수리 리마인더 알림 생성
     @Transactional
     public void createRepairReminderNotificationIfNeeded(
             RepairReminderEntity reminder,

@@ -35,6 +35,7 @@ public enum ErrorCode {
     IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "등록된 제품 이미지가 없습니다."),
     MANUAL_NOT_FOUND(HttpStatus.NOT_FOUND, "매뉴얼을 찾을 수 없습니다."),
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
+    REPAIR_REMINDER_NOT_FOUND(HttpStatus.NOT_FOUND, "예정 정보를 찾을 수 없습니다."),
 
     // 409
     PRODUCT_IMAGE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 제품 이미지가 있습니다."),

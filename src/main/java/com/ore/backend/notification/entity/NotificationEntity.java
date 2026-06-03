@@ -42,7 +42,7 @@ public class NotificationEntity {
     @Column(name = "status", length = 30)
     private NotificationStatus status;
 
-    // 수리/관리 리마인더 알림 단계
+    // 수리 리마인더 알림 단계
     @Enumerated(EnumType.STRING)
     @Column(name = "reminder_stage", length = 50)
     private ReminderNotificationStage reminderStage;

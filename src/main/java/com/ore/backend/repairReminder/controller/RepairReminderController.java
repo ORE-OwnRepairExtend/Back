@@ -1,9 +1,6 @@
 package com.ore.backend.repairReminder.controller;
 
-import com.ore.backend.repairReminder.dto.CreateRepairReminderRequest;
-import com.ore.backend.repairReminder.dto.CreateRepairReminderResponse;
-import com.ore.backend.repairReminder.dto.GetProductRepairReminderResponse;
-import com.ore.backend.repairReminder.dto.GetRepairReminderResponse;
+import com.ore.backend.repairReminder.dto.*;
 import com.ore.backend.repairReminder.service.RepairReminderService;
 import com.ore.backend.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -54,5 +51,23 @@ public class RepairReminderController {
         UUID userId = jwtProvider.getUserId(accessToken);
 
         return repairReminderService.getProductRepairReminders(userId, productId);
+    }
+
+    @PatchMapping("/products/{productId}/repair-reminders/{reminderId}")
+    public UpdateRepairReminderResponse updateRepairReminder(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID productId,
+            @PathVariable UUID reminderId,
+            @RequestBody UpdateRepairReminderRequest request
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        return repairReminderService.updateRepairReminder(
+                userId,
+                productId,
+                reminderId,
+                request
+        );
     }
 }
