@@ -6,6 +6,7 @@ import com.ore.backend.global.service.S3ImageStorageService;
 import com.ore.backend.product.entity.ProductEntity;
 import com.ore.backend.product.repository.ProductRepository;
 import com.ore.backend.repairHistory.dto.CreateRepairHistoryResponse;
+import com.ore.backend.repairHistory.dto.GetRepairHistoryDetailResponse;
 import com.ore.backend.repairHistory.dto.GetRepairHistoryResponse;
 import com.ore.backend.repairHistory.entity.RepairHistoryEntity;
 import com.ore.backend.repairHistory.repository.RepairHistoryRepository;
@@ -106,5 +107,21 @@ public class RepairHistoryService {
                 .stream()
                 .map(GetRepairHistoryResponse::from)
                 .toList();
+    }
+
+    // 수리 이력 상세 조회
+    public GetRepairHistoryDetailResponse getRepairHistoryDetail(
+            UUID userId,
+            UUID repairId
+    ) {
+        RepairHistoryEntity repairHistory = repairHistoryRepository
+                .findByRepairIdAndProduct_User_UserId(repairId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_HISTORY_NOT_FOUND));
+
+        String imageUrl = repairHistory.getImageUrl() == null
+                ? null
+                : s3ImageStorageService.generatePresignedUrl(repairHistory.getImageUrl());
+
+        return GetRepairHistoryDetailResponse.of(repairHistory, imageUrl);
     }
 }

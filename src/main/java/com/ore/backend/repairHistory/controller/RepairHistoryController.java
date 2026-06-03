@@ -1,6 +1,7 @@
 package com.ore.backend.repairHistory.controller;
 
 import com.ore.backend.repairHistory.dto.CreateRepairHistoryResponse;
+import com.ore.backend.repairHistory.dto.GetRepairHistoryDetailResponse;
 import com.ore.backend.repairHistory.dto.GetRepairHistoryResponse;
 import com.ore.backend.repairHistory.service.RepairHistoryService;
 import com.ore.backend.security.JwtProvider;
@@ -59,5 +60,16 @@ public class RepairHistoryController {
         UUID userId = jwtProvider.getUserId(accessToken);
 
         return repairHistoryService.getRepairHistories(userId, productId);
+    }
+
+    @GetMapping("/{repairId}")
+    public GetRepairHistoryDetailResponse getRepairHistoryDetail(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID repairId
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        return repairHistoryService.getRepairHistoryDetail(userId, repairId);
     }
 }
