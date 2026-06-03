@@ -16,6 +16,7 @@ import com.ore.backend.product.repository.ProductRepository;
 import com.ore.backend.productSource.entity.ProductSourceEntity;
 import com.ore.backend.productSource.repository.ProductSourceRepository;
 import com.ore.backend.global.service.S3ImageStorageService;
+import com.ore.backend.repairHistory.repository.RepairHistoryRepository;
 import com.ore.backend.user.entity.UserEntity;
 import com.ore.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,9 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +40,7 @@ public class ProductService {
     private final S3ImageStorageService s3ImageStorageService;
     private final ProductImageRepository productImageRepository;
     private final ProductWarrantyCalculator productWarrantyCalculator;
+    private final RepairHistoryRepository repairHistoryRepository;
 
     // 제품 등록
     @Transactional
@@ -142,6 +142,16 @@ public class ProductService {
                 ? productRepository.findByUser_UserIdAndIsFavoriteTrueOrderByCreatedAtDesc(userId)
                 : productRepository.findByUser_UserIdOrderByCreatedAtDesc(userId);
 
+        // 제품 ID 목록 추출
+        List<UUID> productIds = products.stream()
+                .map(ProductEntity::getProductId)
+                .toList();
+
+        // 수리 이력이 존재하는 제품 ID 목록 조회
+        Set<UUID> productIdsHavingRepairHistory = productIds.isEmpty()
+                ? Set.of()
+                : new HashSet<>(repairHistoryRepository.findProductIdsHavingRepairHistory(productIds));
+
         return products.stream()
                 .map(product -> {
                     Long remainingDays = null;
@@ -150,10 +160,13 @@ public class ProductService {
                         remainingDays = productWarrantyCalculator.calculate(product).getRemainingDays();
                     }
 
+                    boolean hasRepairHistory = productIdsHavingRepairHistory
+                            .contains(product.getProductId());
+
                     return GetProductResponse.from(
                             product,
                             getProductImageUrl(product.getProductId()),
-                            false,
+                            hasRepairHistory,
                             remainingDays
                     );
                 })
@@ -170,7 +183,10 @@ public class ProductService {
 
         ProductUserManualInfo manual = getProductUserManualInfo(product.getProductId());
 
-        return GetProductDetailResponse.from(product, imageUrl, false, manual);
+        boolean hasRepairHistory = repairHistoryRepository
+                .existsByProduct_ProductId(product.getProductId());
+
+        return GetProductDetailResponse.from(product, imageUrl, hasRepairHistory, manual);
     }
 
     // 사용자가 최종 확정한 제품별 매뉴얼 조회

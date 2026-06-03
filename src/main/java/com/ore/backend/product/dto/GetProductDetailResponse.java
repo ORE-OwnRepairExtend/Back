@@ -42,7 +42,7 @@ public class GetProductDetailResponse {
                 .purchaseDate(product.getPurchaseDate())
                 .warrantyMonths(product.getWarrantyMonth())
                 .isFavorite(product.getIsFavorite())
-                .hasRepairHistory(false) // repair_histories 테이블 구현하고 계산
+                .hasRepairHistory(hasRepairHistory)
                 .manual(manual)
                 .createdAt(product.getCreatedAt())
                 .build();
