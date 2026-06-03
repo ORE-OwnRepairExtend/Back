@@ -3,7 +3,6 @@ package com.ore.backend.global.service;
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +19,7 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import java.io.IOException;
 import java.time.Duration;
 import java.util.UUID;
-@Slf4j
+
 @Service
 @RequiredArgsConstructor
 public class S3ImageStorageService {
@@ -52,20 +51,13 @@ public class S3ImageStorageService {
     }
 
     private String upload(MultipartFile image, String dirName) {
-        log.info("[S3 업로드 시작] dirName={}", dirName);
         if (image == null || image.isEmpty()) {
-            log.warn("[S3 업로드 실패] 이미지 없음");
             throw new CustomException(ErrorCode.IMAGE_REQUIRED);
         }
 
         String contentType = image.getContentType();
-        log.info("[S3 업로드 파일 정보] originalFilename={}, contentType={}, size={}",
-                image.getOriginalFilename(),
-                contentType,
-                image.getSize()
-        );
+
         if (contentType == null || !contentType.startsWith("image/")) {
-            log.warn("[S3 업로드 실패] 이미지 파일 아님 contentType={}", contentType);
             throw new CustomException(ErrorCode.INVALID_IMAGE_FILE);
         }
 
@@ -73,7 +65,7 @@ public class S3ImageStorageService {
             String originalFilename = image.getOriginalFilename();
             String extension = getExtension(originalFilename);
             String key = dirName + "/" + UUID.randomUUID() + extension;
-            log.info("[S3 업로드 key 생성] key={}", key);
+
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucket)
                     .key(key)
@@ -84,11 +76,10 @@ public class S3ImageStorageService {
                     putObjectRequest,
                     RequestBody.fromBytes(image.getBytes())
             );
-            log.info("[S3 업로드 성공] key={}", key);
+
             return key;
 
         } catch (IOException | S3Exception | SdkClientException e) {
-            log.error("[S3 업로드 실패] dirName={}, message={}", dirName, e.getMessage(), e);
             throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);
         }
     }
