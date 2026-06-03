@@ -1,6 +1,7 @@
 package com.ore.backend.repairReminder.entity;
 
 import com.ore.backend.product.entity.ProductEntity;
+import com.ore.backend.repairHistory.entity.RepairHistoryEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,14 +24,18 @@ public class RepairReminderEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "repair_id")
+    private RepairHistoryEntity repairHistory;
+
     @Column(name = "title", nullable = false, length = 100)
     private String title;
 
-    @Column(name = "memo", length = 500)
-    private String memo;
+    @Column(name = "remind_at", nullable = false)
+    private LocalDate remindAt;
 
-    @Column(name = "remind_date", nullable = false)
-    private LocalDate remindDate;
+    @Column(name = "notification_stage", nullable = false)
+    private Integer notificationStage = 0;
 
     @Column(name = "is_done", nullable = false)
     private Boolean isDone = false;
@@ -47,28 +52,25 @@ public class RepairReminderEntity {
     @Builder
     public RepairReminderEntity(
             ProductEntity product,
+            RepairHistoryEntity repairHistory,
             String title,
-            String memo,
-            LocalDate remindDate
+            LocalDate remindAt
     ) {
         this.product = product;
+        this.repairHistory = repairHistory;
         this.title = title;
-        this.memo = memo;
-        this.remindDate = remindDate;
+        this.remindAt = remindAt;
+        this.notificationStage = 0;
         this.isDone = false;
     }
 
-    public void updateReminderInfo(String title, String memo, LocalDate remindDate) {
+    public void updateReminderInfo(String title, LocalDate remindAt) {
         if (title != null) {
             this.title = title;
         }
 
-        if (memo != null) {
-            this.memo = memo;
-        }
-
-        if (remindDate != null) {
-            this.remindDate = remindDate;
+        if (remindAt != null) {
+            this.remindAt = remindAt;
         }
     }
 
@@ -88,6 +90,10 @@ public class RepairReminderEntity {
 
         if (this.isDone == null) {
             this.isDone = false;
+        }
+
+        if (this.notificationStage == null) {
+            this.notificationStage = 0;
         }
     }
 

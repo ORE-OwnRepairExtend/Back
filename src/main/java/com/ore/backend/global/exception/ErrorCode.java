@@ -16,6 +16,7 @@ public enum ErrorCode {
     REQUIRED_FIELD_MISSING(HttpStatus.BAD_REQUEST, "필수 입력값이 누락되었습니다."),
     INVALID_PRODUCT_CATEGORY(HttpStatus.BAD_REQUEST, "유효하지 않은 제품 카테고리입니다."),
     WARRANTY_INFO_MISSING(HttpStatus.BAD_REQUEST, "보증기간 계산에 필요한 정보가 없습니다."),
+    INVALID_REMIND_DATE(HttpStatus.BAD_REQUEST, "알림 날짜는 오늘 이후로 입력해야 합니다."),
 
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증 정보가 유효하지 않습니다."),
@@ -31,8 +32,6 @@ public enum ErrorCode {
     PRODUCT_SOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "제품 입력 데이터를 찾을 수 없습니다."),
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "제품을 찾을 수 없습니다."),
     REPAIR_HISTORY_NOT_FOUND(HttpStatus.NOT_FOUND, "수리 이력을 찾을 수 없습니다."),
-
-    // 404
     IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "등록된 제품 이미지가 없습니다."),
     MANUAL_NOT_FOUND(HttpStatus.NOT_FOUND, "매뉴얼을 찾을 수 없습니다."),
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
