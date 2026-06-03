@@ -9,8 +9,6 @@ import com.ore.backend.repairReminder.repository.RepairReminderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,12 +20,14 @@ public class NotificationGenerateService {
     private final RepairReminderRepository repairReminderRepository;
     private final ProductWarrantyCalculator productWarrantyCalculator;
     private final NotificationCreateService notificationCreateService;
+    private final ReminderNotificationStageCalculator reminderStageCalculator;
 
     public void generateNotifications(UUID userId) {
         generateWarrantyNotifications(userId);
         generateRepairNotifications(userId);
     }
 
+    // 사용자 제품의 보증기간 알림 생성
     private void generateWarrantyNotifications(UUID userId) {
         List<ProductEntity> products = productRepository.findByUser_UserId(userId);
 
@@ -45,20 +45,19 @@ public class NotificationGenerateService {
         }
     }
 
+    // 완료되지 않은 수리 리마인더 알림 생성
     private void generateRepairNotifications(UUID userId) {
         List<RepairReminderEntity> reminders =
                 repairReminderRepository.findByProduct_User_UserIdAndIsDoneFalse(userId);
 
         for (RepairReminderEntity reminder : reminders) {
-            long remainingDays = ChronoUnit.DAYS.between(
-                    LocalDate.now(),
-                    reminder.getRemindDate()
-            );
-
-            notificationCreateService.createRepairNotificationIfNeeded(
-                    reminder,
-                    remainingDays
-            );
+            reminderStageCalculator.calculate(reminder.getRemindAt())
+                    .ifPresent(stage ->
+                            notificationCreateService.createRepairReminderNotificationIfNeeded(
+                                    reminder,
+                                    stage
+                            )
+                    );
         }
     }
 }

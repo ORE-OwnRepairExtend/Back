@@ -37,9 +37,15 @@ public class NotificationEntity {
     @Column(name = "notification_type", nullable = false, length = 50)
     private NotificationType notificationType;
 
+    // 보증 알림 상태
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 30)
+    @Column(name = "status", length = 30)
     private NotificationStatus status;
+
+    // 수리 리마인더 알림 단계
+    @Enumerated(EnumType.STRING)
+    @Column(name = "reminder_stage", length = 50)
+    private ReminderNotificationStage reminderStage;
 
     @Column(name = "message", nullable = false, length = 255)
     private String message;
@@ -57,6 +63,7 @@ public class NotificationEntity {
             RepairReminderEntity reminder,
             NotificationType notificationType,
             NotificationStatus status,
+            ReminderNotificationStage reminderStage,
             String message
     ) {
         this.user = user;
@@ -64,6 +71,7 @@ public class NotificationEntity {
         this.reminder = reminder;
         this.notificationType = notificationType;
         this.status = status;
+        this.reminderStage = reminderStage;
         this.message = message;
         this.isRead = false;
     }

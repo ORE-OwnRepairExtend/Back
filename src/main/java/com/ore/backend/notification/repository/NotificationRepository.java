@@ -3,6 +3,7 @@ package com.ore.backend.notification.repository;
 import com.ore.backend.notification.entity.NotificationEntity;
 import com.ore.backend.notification.entity.NotificationStatus;
 import com.ore.backend.notification.entity.NotificationType;
+import com.ore.backend.notification.entity.ReminderNotificationStage;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -21,10 +22,10 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
             NotificationStatus status
     );
 
-    boolean existsByReminder_ReminderIdAndNotificationTypeAndStatus(
+    boolean existsByReminder_ReminderIdAndNotificationTypeAndReminderStage(
             UUID reminderId,
             NotificationType notificationType,
-            NotificationStatus status
+            ReminderNotificationStage reminderStage
     );
 
     long countByUser_UserIdAndIsReadFalse(UUID userId);
@@ -35,4 +36,6 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
     );
 
     List<NotificationEntity> findByUser_UserIdAndIsReadFalse(UUID userId);
+
+    void deleteByReminder_ReminderId(UUID reminderId);
 }
