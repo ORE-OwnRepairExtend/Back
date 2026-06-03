@@ -8,6 +8,7 @@ import com.ore.backend.product.repository.ProductRepository;
 import com.ore.backend.repairHistory.dto.CreateRepairHistoryResponse;
 import com.ore.backend.repairHistory.dto.GetRepairHistoryDetailResponse;
 import com.ore.backend.repairHistory.dto.GetRepairHistoryResponse;
+import com.ore.backend.repairHistory.dto.UpdateRepairHistoryResponse;
 import com.ore.backend.repairHistory.entity.RepairHistoryEntity;
 import com.ore.backend.repairHistory.repository.RepairHistoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -123,5 +124,105 @@ public class RepairHistoryService {
                 : s3ImageStorageService.generatePresignedUrl(repairHistory.getImageUrl());
 
         return GetRepairHistoryDetailResponse.of(repairHistory, imageUrl);
+    }
+
+    // 수리 이력 수정
+    @Transactional
+    public UpdateRepairHistoryResponse updateRepairHistory(
+            UUID userId,
+            UUID repairId,
+            String title,
+            LocalDate date,
+            String content,
+            String serviceCenter,
+            Integer cost,
+            MultipartFile image
+    ) {
+        validateUpdateValue(title, date, content, serviceCenter, cost, image);
+
+        RepairHistoryEntity repairHistory = repairHistoryRepository
+                .findByRepairIdAndProduct_User_UserId(repairId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_HISTORY_NOT_FOUND));
+
+        repairHistory.updateRepairHistory(
+                title,
+                date,
+                content,
+                serviceCenter,
+                cost
+        );
+
+        // 새 이미지가 전달된 경우 기존 이미지를 새 이미지로 교체
+        if (image != null && !image.isEmpty()) {
+            String oldImageKey = repairHistory.getImageUrl();
+
+            String newImageKey = s3ImageStorageService.uploadRepairHistoryImage(
+                    repairHistory.getProduct().getProductId(),
+                    image
+            );
+
+            repairHistory.updateImageUrl(newImageKey);
+
+            // 기존 이미지 삭제
+            s3ImageStorageService.deleteImage(oldImageKey);
+        }
+
+        String responseImageUrl = repairHistory.getImageUrl() == null
+                ? null
+                : s3ImageStorageService.generatePresignedUrl(repairHistory.getImageUrl());
+
+        return UpdateRepairHistoryResponse.of(repairHistory, responseImageUrl);
+    }
+
+    // 수정값 존재 여부 검증
+    private void validateUpdateValue(
+            String title,
+            LocalDate date,
+            String content,
+            String serviceCenter,
+            Integer cost,
+            MultipartFile image
+    ) {
+        boolean hasNoValue =
+                (title == null || title.isBlank())
+                        && date == null
+                        && (content == null || content.isBlank())
+                        && (serviceCenter == null || serviceCenter.isBlank())
+                        && cost == null
+                        && (image == null || image.isEmpty());
+
+        if (hasNoValue) {
+            throw new CustomException(ErrorCode.NO_UPDATE_VALUE);
+        }
+
+        if (title != null && title.isBlank()) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+
+        if (content != null && content.isBlank()) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+
+        if (cost != null && cost < 0) {
+            throw new CustomException(ErrorCode.REQUIRED_FIELD_MISSING);
+        }
+    }
+
+    // 수리 이력 이미지 삭제
+    @Transactional
+    public void deleteRepairHistoryImage(UUID userId, UUID repairId) {
+        RepairHistoryEntity repairHistory = repairHistoryRepository
+                .findByRepairIdAndProduct_User_UserId(repairId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_HISTORY_NOT_FOUND));
+
+        String imageKey = repairHistory.getImageUrl();
+
+        if (imageKey == null || imageKey.isBlank()) {
+            throw new CustomException(ErrorCode.IMAGE_NOT_FOUND);
+        }
+
+        s3ImageStorageService.deleteImage(imageKey);
+
+        repairHistory.deleteImage();
     }
 }

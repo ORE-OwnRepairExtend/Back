@@ -63,6 +63,42 @@ public class RepairHistoryEntity {
         this.imageUrl = imageUrl;
     }
 
+    public void updateRepairHistory(
+            String title,
+            LocalDate date,
+            String content,
+            String serviceCenter,
+            Integer cost
+    ) {
+        if (title != null) {
+            this.title = title;
+        }
+
+        if (date != null) {
+            this.date = date;
+        }
+
+        if (content != null) {
+            this.content = content;
+        }
+
+        if (serviceCenter != null) {
+            this.serviceCenter = serviceCenter;
+        }
+
+        if (cost != null) {
+            this.cost = cost;
+        }
+    }
+
+    public void updateImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public void deleteImage() {
+        this.imageUrl = null;
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
