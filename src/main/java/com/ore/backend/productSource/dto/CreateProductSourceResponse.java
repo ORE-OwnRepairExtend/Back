@@ -13,6 +13,10 @@ public class CreateProductSourceResponse {
 
     private UUID sourceId;
     private String imageUrl;
+    private String ocrText;
+    private String modelNumber;
+    private String brandName;
+    private String productName;
     private SourceType sourceType;
     private LocalDateTime createdAt;
 }
