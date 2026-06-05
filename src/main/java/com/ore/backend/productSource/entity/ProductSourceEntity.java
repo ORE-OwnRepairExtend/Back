@@ -32,6 +32,12 @@ public class ProductSourceEntity {
     @Column(name = "model_number", length = 100)
     private String modelNumber;
 
+    @Column(name = "brand_name", length = 100)
+    private String brandName;
+
+    @Column(name = "product_name", length = 100)
+    private String productName;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "source_type", nullable = false, length = 50)
     private SourceType sourceType;
@@ -45,13 +51,41 @@ public class ProductSourceEntity {
             String imageUrl,
             String ocrText,
             String modelNumber,
+            String brandName,
+            String productName,
             SourceType sourceType
     ) {
         this.user = user;
         this.imageUrl = imageUrl;
         this.ocrText = ocrText;
         this.modelNumber = modelNumber;
+        this.brandName = brandName;
+        this.productName = productName;
         this.sourceType = sourceType;
+    }
+
+    // AI 분석 결과 저장
+    public void updateAiAnalysisResult(
+            String ocrText,
+            String modelNumber,
+            String brandName,
+            String productName
+    ) {
+        this.ocrText = ocrText;
+        this.modelNumber = modelNumber;
+        this.brandName = brandName;
+        this.productName = productName;
+    }
+
+    // 사용자가 확인/수정한 제품 정보 저장
+    public void updateExtractedProductInfo(
+            String brandName,
+            String productName,
+            String modelNumber
+    ) {
+        this.brandName = brandName;
+        this.productName = productName;
+        this.modelNumber = modelNumber;
     }
 
     @PrePersist
