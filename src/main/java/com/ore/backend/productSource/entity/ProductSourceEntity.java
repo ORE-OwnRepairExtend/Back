@@ -77,6 +77,17 @@ public class ProductSourceEntity {
         this.productName = productName;
     }
 
+    // 사용자가 확인/수정한 제품 정보 저장
+    public void updateExtractedProductInfo(
+            String brandName,
+            String productName,
+            String modelNumber
+    ) {
+        this.brandName = brandName;
+        this.productName = productName;
+        this.modelNumber = modelNumber;
+    }
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();

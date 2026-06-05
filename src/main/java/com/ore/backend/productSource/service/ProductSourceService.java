@@ -5,6 +5,7 @@ import com.ore.backend.global.exception.ErrorCode;
 import com.ore.backend.global.service.S3ImageStorageService;
 import com.ore.backend.productSource.dto.AiOcrResponse;
 import com.ore.backend.productSource.dto.CreateProductSourceResponse;
+import com.ore.backend.productSource.dto.UpdateProductSourceRequest;
 import com.ore.backend.productSource.entity.ProductSourceEntity;
 import com.ore.backend.productSource.entity.SourceType;
 import com.ore.backend.productSource.repository.ProductSourceRepository;
@@ -91,5 +92,35 @@ public class ProductSourceService {
         }
     }
 
+    // OCR 분석 제품 정보 수정
+    @Transactional
+    public CreateProductSourceResponse updateProductSource(
+            UUID userId,
+            UUID sourceId,
+            UpdateProductSourceRequest request
+    ) {
+        ProductSourceEntity productSource = productSourceRepository
+                .findBySourceIdAndUser_UserId(sourceId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_SOURCE_NOT_FOUND));
 
+        productSource.updateExtractedProductInfo(
+                request.getBrandName(),
+                request.getProductName(),
+                request.getModelNumber()
+        );
+
+        String presignedImageUrl =
+                s3ImageStorageService.generatePresignedUrl(productSource.getImageUrl());
+
+        return CreateProductSourceResponse.builder()
+                .sourceId(productSource.getSourceId())
+                .imageUrl(presignedImageUrl)
+                .ocrText(productSource.getOcrText())
+                .modelNumber(productSource.getModelNumber())
+                .brandName(productSource.getBrandName())
+                .productName(productSource.getProductName())
+                .sourceType(productSource.getSourceType())
+                .createdAt(productSource.getCreatedAt())
+                .build();
+    }
 }
