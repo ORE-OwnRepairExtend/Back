@@ -2,7 +2,7 @@ package com.ore.backend.repairHistory.service;
 
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
-import com.ore.backend.global.service.S3ImageStorageService;
+import com.ore.backend.global.s3.S3ImageStorageService;
 import com.ore.backend.product.entity.ProductEntity;
 import com.ore.backend.product.repository.ProductRepository;
 import com.ore.backend.repairHistory.dto.CreateRepairHistoryResponse;

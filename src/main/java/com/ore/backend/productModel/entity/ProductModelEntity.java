@@ -25,8 +25,8 @@ public class ProductModelEntity {
     @Column(name = "model_id", nullable = false, updatable = false)
     private UUID modelId;
 
-    @Column(name = "brand", length = 100)
-    private String brand;
+    @Column(name = "brand_name", length = 100)
+    private String brandName;
 
     @Column(name = "model_number", nullable = false, length = 100)
     private String modelNumber;
@@ -35,8 +35,8 @@ public class ProductModelEntity {
     private LocalDateTime createdAt;
 
     @Builder
-    public ProductModelEntity(String brand, String modelNumber) {
-        this.brand = brand;
+    public ProductModelEntity(String brandName, String modelNumber) {
+        this.brandName = brandName;
         this.modelNumber = modelNumber;
     }
 

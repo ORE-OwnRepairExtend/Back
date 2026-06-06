@@ -1,4 +1,4 @@
-package com.ore.backend.global.service;
+package com.ore.backend.global.s3;
 
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;

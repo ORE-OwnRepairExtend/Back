@@ -15,7 +15,7 @@ import com.ore.backend.productModel.repository.ProductModelRepository;
 import com.ore.backend.product.repository.ProductRepository;
 import com.ore.backend.productSource.entity.ProductSourceEntity;
 import com.ore.backend.productSource.repository.ProductSourceRepository;
-import com.ore.backend.global.service.S3ImageStorageService;
+import com.ore.backend.global.s3.S3ImageStorageService;
 import com.ore.backend.repairHistory.repository.RepairHistoryRepository;
 import com.ore.backend.user.entity.UserEntity;
 import com.ore.backend.user.repository.UserRepository;
