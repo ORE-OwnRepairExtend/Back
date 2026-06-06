@@ -29,12 +29,15 @@ public class UserController {
     ) {
         LoginResult loginResult = userService.loginWithGoogle(request);
 
-        Cookie cookie = new Cookie("refreshToken", loginResult.getRefreshToken());
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(60 * 60 * 24 * 14); // 14일
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", loginResult.getRefreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/")
+                .maxAge(60 * 60 * 24 * 14)
+                .build();
 
-        response.addCookie(cookie);
+        response.addHeader("Set-Cookie", refreshCookie.toString());
 
         return loginResult.getResponse();
     }
@@ -56,10 +59,10 @@ public class UserController {
 
         ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(false) // 로컬 개발이면 false, 배포 HTTPS면 true
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .maxAge(0)
-                .sameSite("Lax")
                 .build();
 
         response.addHeader("Set-Cookie", deleteCookie.toString());
