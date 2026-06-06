@@ -19,7 +19,8 @@ public enum ErrorCode {
     INVALID_REMIND_DATE(HttpStatus.BAD_REQUEST, "알림 날짜는 오늘 이후로 입력해야 합니다."),
     INVALID_REPAIR_DATE(HttpStatus.BAD_REQUEST, "수리일은 오늘 또는 이전 날짜만 입력할 수 있습니다."),
     IMAGE_ANALYSIS_FAILED(HttpStatus.BAD_REQUEST, "이미지 분석에 실패했습니다."),
-
+    MANUAL_SEARCH_FAILED(HttpStatus.BAD_REQUEST, "매뉴얼 검색에 실패했습니다."),
+    MODEL_NUMBER_REQUIRED(HttpStatus.BAD_REQUEST, "모델명이 필요합니다."),
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증 정보가 유효하지 않습니다."),
     INVALID_GOOGLE_TOKEN(HttpStatus.UNAUTHORIZED, "Google 토큰이 유효하지 않습니다."),

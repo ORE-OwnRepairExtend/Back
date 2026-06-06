@@ -1,8 +1,9 @@
 package com.ore.backend.productSource.service;
 
+import com.ore.backend.global.ai.AiClient;
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
-import com.ore.backend.global.service.S3ImageStorageService;
+import com.ore.backend.global.s3.S3ImageStorageService;
 import com.ore.backend.productSource.dto.AiOcrResponse;
 import com.ore.backend.productSource.dto.CreateProductSourceResponse;
 import com.ore.backend.productSource.dto.UpdateProductSourceRequest;
@@ -25,7 +26,7 @@ public class ProductSourceService {
     private final ProductSourceRepository productSourceRepository;
     private final UserRepository userRepository;
     private final S3ImageStorageService s3ImageStorageService;
-    private final AiOcrClient aiOcrClient;
+    private final AiClient aiClient;
 
     // 제품 입력 데이터 생성 + AI OCR 분석
     @Transactional
@@ -59,7 +60,7 @@ public class ProductSourceService {
                 s3ImageStorageService.generatePresignedUrl(savedSource.getImageUrl());
 
         // AI OCR 분석 요청
-        AiOcrResponse aiResponse = aiOcrClient.analyzeImage(
+        AiOcrResponse aiResponse = aiClient.analyzeImage(
                 presignedImageUrl,
                 sourceType.name().toLowerCase()
         );

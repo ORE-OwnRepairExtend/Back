@@ -20,7 +20,7 @@ import com.ore.backend.user.dto.GetMyInfoResponse;
 import com.ore.backend.user.dto.UpdateMyInfoResponse;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.ore.backend.global.service.S3ImageStorageService;
+import com.ore.backend.global.s3.S3ImageStorageService;
 
 import java.util.UUID;
 
