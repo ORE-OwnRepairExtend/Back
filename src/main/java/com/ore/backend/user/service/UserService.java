@@ -70,6 +70,9 @@ public class UserService {
         refreshTokenEntity.updateRefreshToken(refreshToken);
         refreshTokenRepository.save(refreshTokenEntity);
 
+        // 프로필 이미지 응답 URL 생성
+        String profileImageUrl = s3ImageStorageService.generatePresignedUrl(user.getProfileImage());
+
         // 클라이언트 응답 바디
         GoogleLoginResponse response = GoogleLoginResponse.builder()
                 .accessToken(accessToken)
@@ -78,7 +81,7 @@ public class UserService {
                                 .userId(user.getUserId())
                                 .email(user.getEmail())
                                 .name(user.getName())
-                                .profileImage(user.getProfileImage())
+                                .profileImage(profileImageUrl)
                                 .build()
                 )
                 .build();
