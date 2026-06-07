@@ -90,6 +90,11 @@ public class S3ImageStorageService {
         }
 
         try {
+            // 외부 URL이면 S3 presigned URL을 만들지 않고 그대로 반환
+            if (isExternalUrl(key)) {
+                return key;
+            }
+
             // 기존에 URL로 저장된 데이터 대응
             String objectKey = extractKeyIfUrl(key);
 
@@ -109,8 +114,13 @@ public class S3ImageStorageService {
 
         } catch (S3Exception | SdkClientException e) {
             throw new CustomException(ErrorCode.IMAGE_URL_GENERATION_FAILED);
+        }
     }
-}
+
+    private boolean isExternalUrl(String value) {
+        return value.startsWith("http")
+                && !value.contains(".amazonaws.com/");
+    }
 
     private String extractKeyIfUrl(String value) {
         if (!value.startsWith("http")) {
