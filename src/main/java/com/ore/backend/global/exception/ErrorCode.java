@@ -21,6 +21,8 @@ public enum ErrorCode {
     IMAGE_ANALYSIS_FAILED(HttpStatus.BAD_REQUEST, "이미지 분석에 실패했습니다."),
     MANUAL_SEARCH_FAILED(HttpStatus.BAD_REQUEST, "매뉴얼 검색에 실패했습니다."),
     MODEL_NUMBER_REQUIRED(HttpStatus.BAD_REQUEST, "모델명이 필요합니다."),
+    CHAT_MESSAGE_EMPTY(HttpStatus.BAD_REQUEST, "질문을 이해할 수 없습니다."),
+
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증 정보가 유효하지 않습니다."),
     INVALID_GOOGLE_TOKEN(HttpStatus.UNAUTHORIZED, "Google 토큰이 유효하지 않습니다."),
@@ -39,6 +41,7 @@ public enum ErrorCode {
     MANUAL_NOT_FOUND(HttpStatus.NOT_FOUND, "매뉴얼을 찾을 수 없습니다."),
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
     REPAIR_REMINDER_NOT_FOUND(HttpStatus.NOT_FOUND, "예정 정보를 찾을 수 없습니다."),
+    CHAT_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅 세션을 찾을 수 없습니다."),
 
     // 409
     PRODUCT_IMAGE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 제품 이미지가 있습니다."),
@@ -46,7 +49,8 @@ public enum ErrorCode {
     // 500
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다."),
     IMAGE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드 중 오류가 발생했습니다."),
-    IMAGE_URL_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 접근 URL 생성에 실패했습니다.");
+    IMAGE_URL_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 접근 URL 생성에 실패했습니다."),
+    AI_RESPONSE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "AI 응답 생성 중 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String message;
