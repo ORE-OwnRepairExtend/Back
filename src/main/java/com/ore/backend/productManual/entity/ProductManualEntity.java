@@ -34,9 +34,6 @@ public class ProductManualEntity {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
     @Builder
     public ProductManualEntity(
             ProductModelEntity model,
@@ -53,10 +50,5 @@ public class ProductManualEntity {
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = LocalDateTime.now();
     }
 }
