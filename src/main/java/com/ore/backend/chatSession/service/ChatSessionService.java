@@ -1,7 +1,10 @@
 package com.ore.backend.chatSession.service;
 
+import com.ore.backend.chatMessage.entity.ChatMessageEntity;
+import com.ore.backend.chatMessage.repository.ChatMessageRepository;
 import com.ore.backend.chatSession.dto.CreateChatSessionRequest;
 import com.ore.backend.chatSession.dto.CreateChatSessionResponse;
+import com.ore.backend.chatSession.dto.GetChatSessionResponse;
 import com.ore.backend.chatSession.entity.ChatSessionEntity;
 import com.ore.backend.chatSession.repository.ChatSessionRepository;
 import com.ore.backend.global.exception.CustomException;
@@ -14,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -21,6 +27,7 @@ import java.util.UUID;
 public class ChatSessionService {
 
     private final ChatSessionRepository chatSessionRepository;
+    private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
 
@@ -51,5 +58,34 @@ public class ChatSessionService {
 
         return productRepository.findByProductIdAndUser_UserId(productId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    public List<GetChatSessionResponse> getChatSessions(UUID userId) {
+        List<ChatSessionEntity> chatSessions =
+                chatSessionRepository.findByUser_UserIdOrderByCreatedAtDesc(userId);
+
+        // 세션별 마지막 메시지 조회 및 최신 대화순 응답 변환
+        return chatSessions.stream()
+                .map(chatSession -> {
+                    ChatMessageEntity lastMessage = chatMessageRepository
+                            .findTopBySession_SessionIdOrderByCreatedAtDesc(chatSession.getSessionId())
+                            .orElse(null);
+
+                    return GetChatSessionResponse.of(chatSession, lastMessage);
+                })
+                .sorted(Comparator.comparing(
+                        this::getLatestTime,
+                        Comparator.reverseOrder()
+                ))
+                .toList();
+    }
+
+    private LocalDateTime getLatestTime(GetChatSessionResponse response) {
+        if (response.getLastMessageAt() != null) {
+            return response.getLastMessageAt();
+        }
+
+        return response.getCreatedAt();
     }
 }
