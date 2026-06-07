@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, UUID> {
 
-    List<ChatMessageEntity> findBySession_SessionIdOrderByCreatedAtAsc(UUID sessionId);
+    List<ChatMessageEntity> findAllBySession_SessionIdOrderByCreatedAtAsc(UUID sessionId);
 
     List<ChatMessageEntity> findTop10BySession_SessionIdOrderByCreatedAtDesc(UUID sessionId);
 

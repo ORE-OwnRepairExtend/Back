@@ -166,4 +166,22 @@ public class ChatMessageService {
                         .build())
                 .toList();
     }
+
+    @Transactional(readOnly = true)
+    public List<ChatMessageResponse> getMessages(
+            UUID userId,
+            UUID sessionId
+    ) {
+        // 현재 사용자의 채팅 세션 조회
+        ChatSessionEntity chatSession = chatSessionRepository
+                .findBySessionIdAndUser_UserId(sessionId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.CHAT_SESSION_NOT_FOUND));
+
+        // 채팅 세션에 속한 메시지를 생성 시간 오름차순으로 조회
+        return chatMessageRepository
+                .findAllBySession_SessionIdOrderByCreatedAtAsc(chatSession.getSessionId())
+                .stream()
+                .map(ChatMessageResponse::from)
+                .toList();
+    }
 }

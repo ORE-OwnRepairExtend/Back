@@ -1,5 +1,6 @@
 package com.ore.backend.chatMessage.controller;
 
+import com.ore.backend.chatMessage.dto.ChatMessageResponse;
 import com.ore.backend.chatMessage.dto.SendChatMessageRequest;
 import com.ore.backend.chatMessage.dto.SendChatMessageResponse;
 import com.ore.backend.chatMessage.service.ChatMessageService;
@@ -7,6 +8,7 @@ import com.ore.backend.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,5 +29,16 @@ public class ChatMessageController {
         UUID userId = jwtProvider.getUserId(accessToken);
 
         return chatMessageService.sendMessage(userId, sessionId, request);
+    }
+
+    @GetMapping
+    public List<ChatMessageResponse> getMessages(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID sessionId
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        return chatMessageService.getMessages(userId, sessionId);
     }
 }
