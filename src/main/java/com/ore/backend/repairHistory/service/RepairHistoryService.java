@@ -11,6 +11,7 @@ import com.ore.backend.repairHistory.dto.GetRepairHistoryResponse;
 import com.ore.backend.repairHistory.dto.UpdateRepairHistoryResponse;
 import com.ore.backend.repairHistory.entity.RepairHistoryEntity;
 import com.ore.backend.repairHistory.repository.RepairHistoryRepository;
+import com.ore.backend.repairReminder.repository.RepairReminderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ public class RepairHistoryService {
     private final ProductRepository productRepository;
     private final RepairHistoryRepository repairHistoryRepository;
     private final S3ImageStorageService s3ImageStorageService;
+    private final RepairReminderRepository repairReminderRepository;
 
     // 수리 이력 등록
     @Transactional
@@ -247,6 +249,9 @@ public class RepairHistoryService {
                         userId
                 )
                 .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_HISTORY_NOT_FOUND));
+
+        // 이력을 참조하는 수리 예정은 남기고 repair 연결만 해제
+        repairReminderRepository.updateRepairToNullByRepairId(repairId);
 
         String imageKey = repairHistory.getImageUrl();
 

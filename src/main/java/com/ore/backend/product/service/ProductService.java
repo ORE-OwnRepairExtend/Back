@@ -1,7 +1,10 @@
 package com.ore.backend.product.service;
 
+import com.ore.backend.chatMessage.repository.ChatMessageRepository;
+import com.ore.backend.chatSession.repository.ChatSessionRepository;
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
+import com.ore.backend.notification.repository.NotificationRepository;
 import com.ore.backend.product.dto.*;
 import com.ore.backend.product.entity.ProductCategory;
 import com.ore.backend.productUserManual.entity.ProductUserManualEntity;
@@ -17,6 +20,7 @@ import com.ore.backend.productSource.entity.ProductSourceEntity;
 import com.ore.backend.productSource.repository.ProductSourceRepository;
 import com.ore.backend.global.s3.S3ImageStorageService;
 import com.ore.backend.repairHistory.repository.RepairHistoryRepository;
+import com.ore.backend.repairReminder.repository.RepairReminderRepository;
 import com.ore.backend.user.entity.UserEntity;
 import com.ore.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +45,10 @@ public class ProductService {
     private final ProductImageRepository productImageRepository;
     private final ProductWarrantyCalculator productWarrantyCalculator;
     private final RepairHistoryRepository repairHistoryRepository;
+    private final ChatMessageRepository chatMessageRepository;
+    private final NotificationRepository notificationRepository;
+    private final RepairReminderRepository repairReminderRepository;
+    private final ChatSessionRepository chatSessionRepository;
 
     // 제품 등록
     @Transactional
@@ -312,10 +320,23 @@ public class ProductService {
         ProductEntity product = productRepository.findByProductIdAndUser_UserId(productId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
+        // 채팅은 보존하고 제품 연결만 해제
+        chatMessageRepository.updateProductToNullByProductId(productId);
+        chatSessionRepository.updateProductToNullByProductId(productId);
+
+        // 제품 관련 알림 삭제
+        notificationRepository.deleteByProduct_ProductId(productId);
+
+        // 수리 예정 삭제
+        repairReminderRepository.deleteByProduct_ProductId(productId);
+
+        // 수리 이력 삭제
+        repairHistoryRepository.deleteByProduct_ProductId(productId);
+
         // 제품 이미지 삭제
         productImageRepository.deleteByProduct_ProductId(productId);
 
-        // 사용자 입력 매뉴얼 삭제
+        // 사용자 확정 매뉴얼 삭제
         productUserManualRepository.deleteByProduct_ProductId(productId);
 
         // 제품 삭제

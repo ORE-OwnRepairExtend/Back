@@ -33,4 +33,6 @@ public interface RepairHistoryRepository extends JpaRepository<RepairHistoryEnti
             where rh.product.productId in :productIds
             """)
     List<UUID> findProductIdsHavingRepairHistory(List<UUID> productIds);
+
+    void deleteByProduct_ProductId(UUID productId);
 }
