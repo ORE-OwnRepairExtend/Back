@@ -26,4 +26,6 @@ public interface RepairReminderRepository extends JpaRepository<RepairReminderEn
             UUID productId,
             UUID userId
     );
+
+    void deleteByProduct_ProductId(UUID productId);
 }

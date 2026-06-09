@@ -2,6 +2,9 @@ package com.ore.backend.chatMessage.repository;
 
 import com.ore.backend.chatMessage.entity.ChatMessageEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,4 +17,8 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, 
     List<ChatMessageEntity> findTop10BySession_SessionIdOrderByCreatedAtDesc(UUID sessionId);
 
     Optional<ChatMessageEntity> findTopBySession_SessionIdOrderByCreatedAtDesc(UUID sessionId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE ChatMessageEntity c SET c.product = null WHERE c.product.productId = :productId")
+    void updateProductToNullByProductId(@Param("productId") UUID productId);
 }
