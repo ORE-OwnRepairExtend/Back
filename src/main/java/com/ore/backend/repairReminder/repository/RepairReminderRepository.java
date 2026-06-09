@@ -3,6 +3,9 @@ package com.ore.backend.repairReminder.repository;
 import com.ore.backend.repairReminder.entity.RepairReminderEntity;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,4 +31,8 @@ public interface RepairReminderRepository extends JpaRepository<RepairReminderEn
     );
 
     void deleteByProduct_ProductId(UUID productId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE RepairReminderEntity r SET r.repairHistory = null WHERE r.repairHistory.repairId = :repairId")
+    void updateRepairToNullByRepairId(@Param("repairId") UUID repairId);
 }
