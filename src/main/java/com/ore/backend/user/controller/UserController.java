@@ -2,6 +2,7 @@ package com.ore.backend.user.controller;
 
 import com.ore.backend.security.JwtProvider;
 import com.ore.backend.user.dto.*;
+import io.swagger.v3.oas.annotations.Operation;
 import com.ore.backend.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ public class UserController {
     private final JwtProvider jwtProvider;
 
     @PostMapping("/auth/google")
+    @Operation(security = {})
     public GoogleLoginResponse loginWithGoogle(
             @RequestBody GoogleLoginRequest request,
             HttpServletResponse response
@@ -43,6 +45,7 @@ public class UserController {
     }
 
     @PostMapping("/auth/refresh")
+    @Operation(security = {})
     public ResponseEntity<RefreshTokenResponse> refresh(
             HttpServletRequest request
     ) {
@@ -51,6 +54,7 @@ public class UserController {
     }
 
     @PostMapping("/auth/logout")
+    @Operation(security = {})
     public ResponseEntity<LogoutResponse> logout(
             HttpServletRequest request,
             HttpServletResponse response
