@@ -1,7 +1,9 @@
 package com.ore.backend.family.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ore.backend.family.entity.FamilyMembershipEntity;
 import com.ore.backend.user.entity.UserEntity;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,7 +18,13 @@ public class GetFamilyMemberResponse {
     private String email;
     private String profileImageUrl;
     private String nickname;
+    @Getter(AccessLevel.NONE)
     private boolean isMe;
+
+    @JsonProperty("isMe")
+    public boolean isMe() {
+        return isMe;
+    }
 
     public static GetFamilyMemberResponse of(
             UserEntity user,

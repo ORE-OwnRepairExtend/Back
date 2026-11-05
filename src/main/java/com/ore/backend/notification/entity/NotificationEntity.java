@@ -24,8 +24,8 @@ public class NotificationEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "product_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
     private ProductEntity product;
 
     // 보증 알림이면 null, 수리 알림이면 값 존재
@@ -50,6 +50,12 @@ public class NotificationEntity {
     @Column(name = "message", nullable = false, length = 255)
     private String message;
 
+    @Column(name = "reference_type", length = 50)
+    private String referenceType;
+
+    @Column(name = "reference_id")
+    private UUID referenceId;
+
     @Column(name = "is_read", nullable = false)
     private Boolean isRead = false;
 
@@ -64,7 +70,9 @@ public class NotificationEntity {
             NotificationType notificationType,
             NotificationStatus status,
             ReminderNotificationStage reminderStage,
-            String message
+            String message,
+            String referenceType,
+            UUID referenceId
     ) {
         this.user = user;
         this.product = product;
@@ -73,6 +81,8 @@ public class NotificationEntity {
         this.status = status;
         this.reminderStage = reminderStage;
         this.message = message;
+        this.referenceType = referenceType;
+        this.referenceId = referenceId;
         this.isRead = false;
     }
 

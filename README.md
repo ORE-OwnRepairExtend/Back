@@ -107,6 +107,7 @@ Google 로그인은 리프레시 토큰을 `HttpOnly`, `Secure`, `SameSite=None`
 | Auth | `POST /auth/logout` | 로그아웃 및 리프레시 쿠키 제거 |
 | User | `GET`, `PATCH /users/me` | 내 정보 조회·수정 |
 | Family | `GET /family/members` | 본인과 등록된 가족 구성원 목록 조회 |
+| Family | `POST /family/invitations` | 이메일로 가족 초대 요청 생성 |
 | Product | `POST`, `GET /products` | 제품 등록·목록 조회 |
 | Product | `GET`, `PATCH`, `DELETE /products/{productId}` | 제품 상세 조회·수정·삭제 |
 | Product | `PATCH /products/{productId}/favorite` | 즐겨찾기 설정 |

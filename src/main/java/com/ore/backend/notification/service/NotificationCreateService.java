@@ -7,6 +7,7 @@ import com.ore.backend.notification.entity.ReminderNotificationStage;
 import com.ore.backend.notification.repository.NotificationRepository;
 import com.ore.backend.product.entity.ProductEntity;
 import com.ore.backend.repairReminder.entity.RepairReminderEntity;
+import com.ore.backend.family.entity.FamilyInvitationEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +50,8 @@ public class NotificationCreateService {
                 .notificationType(NotificationType.WARRANTY)
                 .status(status)
                 .message(message)
+                .referenceType(null)
+                .referenceId(null)
                 .build();
 
         notificationRepository.save(notification);
@@ -82,6 +85,25 @@ public class NotificationCreateService {
                 .status(null)
                 .reminderStage(stage)
                 .message(message)
+                .referenceType(null)
+                .referenceId(null)
+                .build();
+
+        notificationRepository.save(notification);
+    }
+
+    @Transactional
+    public void createFamilyInvitationNotification(FamilyInvitationEntity invitation) {
+        NotificationEntity notification = NotificationEntity.builder()
+                .user(invitation.getRecipientUser())
+                .product(null)
+                .reminder(null)
+                .notificationType(NotificationType.FAMILY_INVITATION)
+                .status(null)
+                .reminderStage(null)
+                .message(invitation.getRequesterUser().getName() + "님이 가족 초대를 보냈습니다.")
+                .referenceType("FAMILY_INVITATION")
+                .referenceId(invitation.getFamilyInvitationId())
                 .build();
 
         notificationRepository.save(notification);

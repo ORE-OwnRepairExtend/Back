@@ -22,6 +22,8 @@ public enum ErrorCode {
     MANUAL_SEARCH_FAILED(HttpStatus.BAD_REQUEST, "매뉴얼 검색에 실패했습니다."),
     MODEL_NUMBER_REQUIRED(HttpStatus.BAD_REQUEST, "모델명이 필요합니다."),
     CHAT_MESSAGE_EMPTY(HttpStatus.BAD_REQUEST, "질문을 이해할 수 없습니다."),
+    FAMILY_INVITATION_FIELDS_REQUIRED(HttpStatus.BAD_REQUEST, "초대 대상 이메일과 호칭은 필수입니다."),
+    CANNOT_INVITE_SELF(HttpStatus.BAD_REQUEST, "본인에게는 가족 초대를 보낼 수 없습니다."),
 
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증 정보가 유효하지 않습니다."),
@@ -42,9 +44,12 @@ public enum ErrorCode {
     NOTIFICATION_NOT_FOUND(HttpStatus.NOT_FOUND, "알림을 찾을 수 없습니다."),
     REPAIR_REMINDER_NOT_FOUND(HttpStatus.NOT_FOUND, "예정 정보를 찾을 수 없습니다."),
     CHAT_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅 세션을 찾을 수 없습니다."),
+    INVITEE_NOT_FOUND(HttpStatus.NOT_FOUND, "초대할 사용자를 찾을 수 없습니다."),
 
     // 409
     PRODUCT_IMAGE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 제품 이미지가 있습니다."),
+    ALREADY_FAMILY_MEMBER(HttpStatus.CONFLICT, "이미 가족으로 등록된 사용자입니다."),
+    PENDING_FAMILY_INVITATION_EXISTS(HttpStatus.CONFLICT, "이미 처리 대기 중인 가족 초대가 있습니다."),
 
     // 500
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다."),
