@@ -126,6 +126,18 @@ public class FamilyService {
         return RespondFamilyInvitationResponse.from(invitation);
     }
 
+    @Transactional
+    public void removeFamilyMember(UUID userId, UUID familyUserId) {
+        FamilyMembershipEntity membership = familyMembershipRepository
+                .findByUser_UserIdAndFamilyUser_UserIdAndDeletedAtIsNull(userId, familyUserId)
+                .orElseThrow(() -> new CustomException(ErrorCode.FAMILY_MEMBER_NOT_FOUND));
+
+        familyMembershipRepository.delete(membership);
+        familyMembershipRepository
+                .findByUser_UserIdAndFamilyUser_UserIdAndDeletedAtIsNull(familyUserId, userId)
+                .ifPresent(familyMembershipRepository::delete);
+    }
+
     private void validateInvitationRequest(CreateFamilyInvitationRequest request) {
         if (request == null
                 || request.getRecipientEmail() == null || request.getRecipientEmail().isBlank()

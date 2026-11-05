@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface FamilyMembershipRepository extends JpaRepository<FamilyMembershipEntity, UUID> {
@@ -13,6 +14,11 @@ public interface FamilyMembershipRepository extends JpaRepository<FamilyMembersh
     List<FamilyMembershipEntity> findByUser_UserIdAndDeletedAtIsNullOrderByCreatedAtAsc(UUID userId);
 
     boolean existsByUser_UserIdAndFamilyUser_UserIdAndDeletedAtIsNull(
+            UUID userId,
+            UUID familyUserId
+    );
+
+    Optional<FamilyMembershipEntity> findByUser_UserIdAndFamilyUser_UserIdAndDeletedAtIsNull(
             UUID userId,
             UUID familyUserId
     );

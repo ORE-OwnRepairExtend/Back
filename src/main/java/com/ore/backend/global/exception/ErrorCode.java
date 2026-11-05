@@ -49,6 +49,7 @@ public enum ErrorCode {
     CHAT_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅 세션을 찾을 수 없습니다."),
     INVITEE_NOT_FOUND(HttpStatus.NOT_FOUND, "초대할 사용자를 찾을 수 없습니다."),
     FAMILY_INVITATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 가족 초대를 찾을 수 없습니다."),
+    FAMILY_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "가족 구성원을 찾을 수 없습니다."),
 
     // 409
     PRODUCT_IMAGE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 제품 이미지가 있습니다."),
