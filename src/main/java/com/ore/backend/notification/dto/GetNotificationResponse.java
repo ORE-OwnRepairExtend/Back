@@ -31,14 +31,24 @@ public class GetNotificationResponse {
 
     private Boolean isRead;
 
+    private String referenceType;
+
+    private UUID referenceId;
+
     private LocalDateTime createdAt;
 
     public static GetNotificationResponse from(NotificationEntity notification) {
         return GetNotificationResponse.builder()
                 .notificationId(notification.getNotificationId())
-                .productId(notification.getProduct().getProductId())
-                .productName(notification.getProduct().getName())
-                .productNickname(notification.getProduct().getNickname())
+                .productId(notification.getProduct() == null
+                        ? null
+                        : notification.getProduct().getProductId())
+                .productName(notification.getProduct() == null
+                        ? null
+                        : notification.getProduct().getName())
+                .productNickname(notification.getProduct() == null
+                        ? null
+                        : notification.getProduct().getNickname())
                 .reminderId(notification.getReminder() == null
                         ? null
                         : notification.getReminder().getReminderId())
@@ -46,6 +56,8 @@ public class GetNotificationResponse {
                 .status(notification.getStatus())
                 .message(notification.getMessage())
                 .isRead(notification.getIsRead())
+                .referenceType(notification.getReferenceType())
+                .referenceId(notification.getReferenceId())
                 .createdAt(notification.getCreatedAt())
                 .build();
     }

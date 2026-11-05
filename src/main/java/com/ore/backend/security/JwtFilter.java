@@ -31,8 +31,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String uri = request.getRequestURI();
 
-        // 로그인, CORS preflight 요청은 필터 통과
-        if (uri.startsWith("/auth")  || HttpMethod.OPTIONS.matches(request.getMethod())) {
+        // 인증 없이 접근 가능한 경로와 CORS preflight 요청은 필터 통과
+        if (uri.startsWith("/auth")
+                || uri.startsWith("/swagger-ui")
+                || uri.startsWith("/v3/api-docs")
+                || HttpMethod.OPTIONS.matches(request.getMethod())) {
             filterChain.doFilter(request, response);
             return;
         }

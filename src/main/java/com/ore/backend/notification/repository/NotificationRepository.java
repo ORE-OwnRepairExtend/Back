@@ -35,6 +35,12 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
             UUID userId
     );
 
+    Optional<NotificationEntity> findByUser_UserIdAndReferenceTypeAndReferenceId(
+            UUID userId,
+            String referenceType,
+            UUID referenceId
+    );
+
     List<NotificationEntity> findByUser_UserIdAndIsReadFalse(UUID userId);
 
     void deleteByReminder_ReminderId(UUID reminderId);

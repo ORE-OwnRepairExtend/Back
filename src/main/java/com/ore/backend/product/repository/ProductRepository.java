@@ -6,18 +6,22 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Collection;
 import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
-    // source를 함께 조회하여 응답의 imageUrl을 사용할 수 있도록 함
-    @EntityGraph(attributePaths = {"source"})
     List<ProductEntity> findByUser_UserIdOrderByCreatedAtDesc(UUID userId);
 
-    @EntityGraph(attributePaths = {"source"})
     List<ProductEntity> findByUser_UserIdAndIsFavoriteTrueOrderByCreatedAtDesc(UUID userId);
 
     @EntityGraph(attributePaths = {"source", "model"})
     Optional<ProductEntity> findByProductIdAndUser_UserId(UUID productId, UUID userId);
 
+    @EntityGraph(attributePaths = {"source", "model", "user"})
+    Optional<ProductEntity> findWithDetailsByProductId(UUID productId);
+
     List<ProductEntity> findByUser_UserId(UUID userId);
+
+    @EntityGraph(attributePaths = "user")
+    List<ProductEntity> findByUser_UserIdInOrderByCreatedAtDesc(Collection<UUID> userIds);
 }
