@@ -2,6 +2,8 @@ package com.ore.backend.product.service;
 
 import com.ore.backend.chatMessage.repository.ChatMessageRepository;
 import com.ore.backend.chatSession.repository.ChatSessionRepository;
+import com.ore.backend.family.entity.FamilyMembershipEntity;
+import com.ore.backend.family.repository.FamilyMembershipRepository;
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
 import com.ore.backend.notification.repository.NotificationRepository;
@@ -29,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +52,7 @@ public class ProductService {
     private final NotificationRepository notificationRepository;
     private final RepairReminderRepository repairReminderRepository;
     private final ChatSessionRepository chatSessionRepository;
+    private final FamilyMembershipRepository familyMembershipRepository;
 
     // 제품 등록
     @Transactional
@@ -144,21 +148,88 @@ public class ProductService {
 
     // 제품 목록 조회
     @Transactional(readOnly = true)
-    public List<GetProductResponse> getProducts(UUID userId, Boolean isFavorite) {
-        // 즐겨찾기 필터 적용
+    public List<GetProductResponse> getProducts(
+            UUID userId,
+            String view,
+            UUID familyUserId,
+            Boolean isFavorite
+    ) {
+        if (familyUserId != null) {
+            return getSpecificFamilyMemberProducts(userId, familyUserId);
+        }
+
+        if ("FAMILY".equals(view)) {
+            return getFamilyProducts(userId);
+        }
+
+        if (view != null && !view.isBlank() && !"MY".equals(view)) {
+            throw new CustomException(ErrorCode.INVALID_PRODUCT_VIEW);
+        }
+
+        return getMyProducts(userId, isFavorite);
+    }
+
+    private List<GetProductResponse> getMyProducts(UUID userId, Boolean isFavorite) {
         List<ProductEntity> products = Boolean.TRUE.equals(isFavorite)
                 ? productRepository.findByUser_UserIdAndIsFavoriteTrueOrderByCreatedAtDesc(userId)
                 : productRepository.findByUser_UserIdOrderByCreatedAtDesc(userId);
 
-        // 제품 ID 목록 추출
+        return toProductResponses(products, Map.of(), false);
+    }
+
+    private List<GetProductResponse> getFamilyProducts(UUID userId) {
+        List<FamilyMembershipEntity> memberships = familyMembershipRepository
+                .findByUser_UserIdAndDeletedAtIsNullOrderByCreatedAtAsc(userId);
+
+        Set<UUID> ownerUserIds = new HashSet<>();
+        ownerUserIds.add(userId);
+
+        Map<UUID, String> ownerNicknames = new HashMap<>();
+        ownerNicknames.put(userId, "나");
+
+        memberships.forEach(membership -> {
+            UUID familyUserId = membership.getFamilyUser().getUserId();
+            ownerUserIds.add(familyUserId);
+            ownerNicknames.put(familyUserId, membership.getNickname());
+        });
+
+        List<ProductEntity> products = productRepository
+                .findByUser_UserIdInOrderByCreatedAtDesc(ownerUserIds);
+
+        return toProductResponses(products, ownerNicknames, true);
+    }
+
+    private List<GetProductResponse> getSpecificFamilyMemberProducts(UUID userId, UUID familyUserId) {
+        FamilyMembershipEntity membership = familyMembershipRepository
+                .findByUser_UserIdAndFamilyUser_UserIdAndDeletedAtIsNull(userId, familyUserId)
+                .orElseThrow(() -> new CustomException(ErrorCode.FORBIDDEN_FAMILY_MEMBER));
+
+        List<ProductEntity> products = productRepository
+                .findByUser_UserIdInOrderByCreatedAtDesc(List.of(familyUserId));
+
+        return toProductResponses(products, Map.of(familyUserId, membership.getNickname()), true);
+    }
+
+    private List<GetProductResponse> toProductResponses(
+            List<ProductEntity> products,
+            Map<UUID, String> ownerNicknames,
+            boolean includeOwner
+    ) {
         List<UUID> productIds = products.stream()
                 .map(ProductEntity::getProductId)
                 .toList();
 
-        // 수리 이력이 존재하는 제품 ID 목록 조회
         Set<UUID> productIdsHavingRepairHistory = productIds.isEmpty()
                 ? Set.of()
                 : new HashSet<>(repairHistoryRepository.findProductIdsHavingRepairHistory(productIds));
+
+        Map<UUID, String> imageUrlsByProductId = productIds.isEmpty()
+                ? Map.of()
+                : productImageRepository.findByProduct_ProductIdIn(productIds).stream()
+                .collect(Collectors.toMap(
+                        productImage -> productImage.getProduct().getProductId(),
+                        ProductImageEntity::getImageUrl
+                ));
 
         return products.stream()
                 .map(product -> {
@@ -171,11 +242,22 @@ public class ProductService {
                     boolean hasRepairHistory = productIdsHavingRepairHistory
                             .contains(product.getProductId());
 
+                    GetProductResponse.Owner owner = includeOwner
+                            ? GetProductResponse.Owner.builder()
+                            .userId(product.getUser().getUserId())
+                            .name(product.getUser().getName())
+                            .nickname(ownerNicknames.get(product.getUser().getUserId()))
+                            .build()
+                            : null;
+
                     return GetProductResponse.from(
                             product,
-                            getProductImageUrl(product.getProductId()),
+                            s3ImageStorageService.generatePresignedUrl(
+                                    imageUrlsByProductId.get(product.getProductId())
+                            ),
                             hasRepairHistory,
-                            remainingDays
+                            remainingDays,
+                            owner
                     );
                 })
                 .toList();

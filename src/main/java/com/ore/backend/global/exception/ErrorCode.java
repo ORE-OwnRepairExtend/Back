@@ -15,6 +15,7 @@ public enum ErrorCode {
     INVALID_SOURCE_TYPE(HttpStatus.BAD_REQUEST, "sourceType이 올바르지 않습니다."),
     REQUIRED_FIELD_MISSING(HttpStatus.BAD_REQUEST, "필수 입력값이 누락되었습니다."),
     INVALID_PRODUCT_CATEGORY(HttpStatus.BAD_REQUEST, "유효하지 않은 제품 카테고리입니다."),
+    INVALID_PRODUCT_VIEW(HttpStatus.BAD_REQUEST, "유효하지 않은 제품 조회 범위입니다."),
     WARRANTY_INFO_MISSING(HttpStatus.BAD_REQUEST, "보증기간 계산에 필요한 정보가 없습니다."),
     INVALID_REMIND_DATE(HttpStatus.BAD_REQUEST, "알림 날짜는 오늘 이후로 입력해야 합니다."),
     INVALID_REPAIR_DATE(HttpStatus.BAD_REQUEST, "수리일은 오늘 또는 이전 날짜만 입력할 수 있습니다."),
@@ -36,6 +37,7 @@ public enum ErrorCode {
     // 403
     FORBIDDEN_PRODUCT_SOURCE(HttpStatus.FORBIDDEN, "해당 입력 데이터에 접근할 권한이 없습니다."),
     FORBIDDEN_FAMILY_INVITATION(HttpStatus.FORBIDDEN, "해당 가족 초대를 처리할 권한이 없습니다."),
+    FORBIDDEN_FAMILY_MEMBER(HttpStatus.FORBIDDEN, "해당 가족 구성원에 접근할 권한이 없습니다."),
 
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),

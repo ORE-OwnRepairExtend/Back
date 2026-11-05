@@ -39,12 +39,19 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<List<GetProductResponse>> getProducts(
             @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(required = false) String view,
+            @RequestParam(required = false) UUID familyUserId,
             @RequestParam(required = false) Boolean isFavorite
     ) {
         String accessToken = authorizationHeader.replace("Bearer ", "");
         UUID userId = jwtProvider.getUserId(accessToken);
 
-        List<GetProductResponse> response = productService.getProducts(userId, isFavorite);
+        List<GetProductResponse> response = productService.getProducts(
+                userId,
+                view,
+                familyUserId,
+                isFavorite
+        );
 
         return ResponseEntity.ok(response);
     }
