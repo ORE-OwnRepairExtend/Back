@@ -1,7 +1,9 @@
 package com.ore.backend.product.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ore.backend.product.entity.ProductCategory;
+import lombok.AccessLevel;
 import com.ore.backend.product.entity.ProductEntity;
 import lombok.Builder;
 import lombok.Getter;
@@ -55,5 +57,13 @@ public class GetProductResponse {
         private UUID userId;
         private String name;
         private String nickname;
+
+        @Getter(AccessLevel.NONE)
+        private boolean isMe;
+
+        @JsonProperty("isMe")
+        public boolean isMe() {
+            return isMe;
+        }
     }
 }

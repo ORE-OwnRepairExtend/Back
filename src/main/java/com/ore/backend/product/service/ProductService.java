@@ -174,7 +174,7 @@ public class ProductService {
                 ? productRepository.findByUser_UserIdAndIsFavoriteTrueOrderByCreatedAtDesc(userId)
                 : productRepository.findByUser_UserIdOrderByCreatedAtDesc(userId);
 
-        return toProductResponses(products, Map.of(), false);
+        return toProductResponses(products, Map.of(), false, userId);
     }
 
     private List<GetProductResponse> getFamilyProducts(UUID userId) {
@@ -196,7 +196,7 @@ public class ProductService {
         List<ProductEntity> products = productRepository
                 .findByUser_UserIdInOrderByCreatedAtDesc(ownerUserIds);
 
-        return toProductResponses(products, ownerNicknames, true);
+        return toProductResponses(products, ownerNicknames, true, userId);
     }
 
     private List<GetProductResponse> getSpecificFamilyMemberProducts(UUID userId, UUID familyUserId) {
@@ -207,13 +207,19 @@ public class ProductService {
         List<ProductEntity> products = productRepository
                 .findByUser_UserIdInOrderByCreatedAtDesc(List.of(familyUserId));
 
-        return toProductResponses(products, Map.of(familyUserId, membership.getNickname()), true);
+        return toProductResponses(
+                products,
+                Map.of(familyUserId, membership.getNickname()),
+                true,
+                userId
+        );
     }
 
     private List<GetProductResponse> toProductResponses(
             List<ProductEntity> products,
             Map<UUID, String> ownerNicknames,
-            boolean includeOwner
+            boolean includeOwner,
+            UUID currentUserId
     ) {
         List<UUID> productIds = products.stream()
                 .map(ProductEntity::getProductId)
@@ -247,6 +253,7 @@ public class ProductService {
                             .userId(product.getUser().getUserId())
                             .name(product.getUser().getName())
                             .nickname(ownerNicknames.get(product.getUser().getUserId()))
+                            .isMe(product.getUser().getUserId().equals(currentUserId))
                             .build()
                             : null;
 
