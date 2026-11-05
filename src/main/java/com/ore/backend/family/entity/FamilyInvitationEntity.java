@@ -16,6 +16,8 @@ import java.util.UUID;
 @Table(name = "family_invitations")
 public class FamilyInvitationEntity {
 
+    public static final String NOTIFICATION_REFERENCE_TYPE = "FAMILY_INVITATION";
+
     @Id
     @GeneratedValue
     @Column(name = "family_invitation_id", nullable = false, updatable = false)

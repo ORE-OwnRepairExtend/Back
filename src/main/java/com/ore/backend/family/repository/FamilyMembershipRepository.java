@@ -15,11 +15,6 @@ public interface FamilyMembershipRepository extends JpaRepository<FamilyMembersh
     @EntityGraph(attributePaths = "familyUser")
     List<FamilyMembershipEntity> findByUser_UserIdAndDeletedAtIsNullOrderByCreatedAtAsc(UUID userId);
 
-    boolean existsByUser_UserIdAndFamilyUser_UserIdAndDeletedAtIsNull(
-            UUID userId,
-            UUID familyUserId
-    );
-
     Optional<FamilyMembershipEntity> findByUser_UserIdAndFamilyUser_UserIdAndDeletedAtIsNull(
             UUID userId,
             UUID familyUserId

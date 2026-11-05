@@ -103,7 +103,7 @@ public class FamilyService {
             UUID invitationId,
             RespondFamilyInvitationRequest request
     ) {
-        FamilyInvitationEntity invitation = familyInvitationRepository.findById(invitationId)
+        FamilyInvitationEntity invitation = familyInvitationRepository.findWithLockByFamilyInvitationId(invitationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.FAMILY_INVITATION_NOT_FOUND));
 
         if (!invitation.getRecipientUser().getUserId().equals(recipientUserId)) {
@@ -148,9 +148,7 @@ public class FamilyService {
 
     private void validateNoExistingFamilyRelation(UUID requesterUserId, UUID recipientUserId) {
         boolean alreadyFamily = familyMembershipRepository
-                .existsByUser_UserIdAndFamilyUser_UserIdAndDeletedAtIsNull(requesterUserId, recipientUserId)
-                || familyMembershipRepository
-                .existsByUser_UserIdAndFamilyUser_UserIdAndDeletedAtIsNull(recipientUserId, requesterUserId);
+                .existsActiveRelationshipBetween(requesterUserId, recipientUserId);
 
         if (alreadyFamily) {
             throw new CustomException(ErrorCode.ALREADY_FAMILY_MEMBER);
@@ -159,15 +157,9 @@ public class FamilyService {
 
     private void validateNoPendingInvitation(UUID requesterUserId, UUID recipientUserId) {
         boolean pendingInvitationExists = familyInvitationRepository
-                .existsByRequesterUser_UserIdAndRecipientUser_UserIdAndStatus(
+                .existsPendingInvitationBetween(
                         requesterUserId,
                         recipientUserId,
-                        FamilyInvitationStatus.PENDING
-                )
-                || familyInvitationRepository
-                .existsByRequesterUser_UserIdAndRecipientUser_UserIdAndStatus(
-                        recipientUserId,
-                        requesterUserId,
                         FamilyInvitationStatus.PENDING
                 );
 
@@ -205,7 +197,7 @@ public class FamilyService {
     private void markInvitationNotificationAsRead(UUID recipientUserId, UUID invitationId) {
         notificationRepository.findByUser_UserIdAndReferenceTypeAndReferenceId(
                         recipientUserId,
-                        "FAMILY_INVITATION",
+                        FamilyInvitationEntity.NOTIFICATION_REFERENCE_TYPE,
                         invitationId
                 )
                 .ifPresent(notification -> notification.updateRead());

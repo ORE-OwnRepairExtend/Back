@@ -102,7 +102,7 @@ public class NotificationCreateService {
                 .status(null)
                 .reminderStage(null)
                 .message(invitation.getRequesterUser().getName() + "님이 가족 초대를 보냈습니다.")
-                .referenceType("FAMILY_INVITATION")
+                .referenceType(FamilyInvitationEntity.NOTIFICATION_REFERENCE_TYPE)
                 .referenceId(invitation.getFamilyInvitationId())
                 .build();
 

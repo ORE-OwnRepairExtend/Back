@@ -10,11 +10,8 @@ import java.util.Collection;
 import java.util.UUID;
 
 public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
-    // source를 함께 조회하여 응답의 imageUrl을 사용할 수 있도록 함
-    @EntityGraph(attributePaths = {"source"})
     List<ProductEntity> findByUser_UserIdOrderByCreatedAtDesc(UUID userId);
 
-    @EntityGraph(attributePaths = {"source"})
     List<ProductEntity> findByUser_UserIdAndIsFavoriteTrueOrderByCreatedAtDesc(UUID userId);
 
     @EntityGraph(attributePaths = {"source", "model"})
@@ -25,6 +22,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
 
     List<ProductEntity> findByUser_UserId(UUID userId);
 
-    @EntityGraph(attributePaths = {"source", "user"})
+    @EntityGraph(attributePaths = "user")
     List<ProductEntity> findByUser_UserIdInOrderByCreatedAtDesc(Collection<UUID> userIds);
 }
