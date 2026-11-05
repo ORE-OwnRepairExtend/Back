@@ -62,4 +62,9 @@ public class FamilyInvitationEntity {
             this.status = FamilyInvitationStatus.PENDING;
         }
     }
+
+    public void respond(FamilyInvitationStatus status) {
+        this.status = status;
+        this.respondedAt = LocalDateTime.now();
+    }
 }

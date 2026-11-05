@@ -3,6 +3,7 @@ package com.ore.backend.family.entity;
 import com.ore.backend.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -36,4 +37,16 @@ public class FamilyMembershipEntity {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @Builder
+    public FamilyMembershipEntity(UserEntity user, UserEntity familyUser, String nickname) {
+        this.user = user;
+        this.familyUser = familyUser;
+        this.nickname = nickname;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

@@ -24,6 +24,8 @@ public enum ErrorCode {
     CHAT_MESSAGE_EMPTY(HttpStatus.BAD_REQUEST, "질문을 이해할 수 없습니다."),
     FAMILY_INVITATION_FIELDS_REQUIRED(HttpStatus.BAD_REQUEST, "초대 대상 이메일과 호칭은 필수입니다."),
     CANNOT_INVITE_SELF(HttpStatus.BAD_REQUEST, "본인에게는 가족 초대를 보낼 수 없습니다."),
+    FAMILY_INVITATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "이미 처리된 가족 초대입니다."),
+    INVALID_FAMILY_INVITATION_STATUS(HttpStatus.BAD_REQUEST, "가족 초대 상태가 올바르지 않습니다."),
 
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증 정보가 유효하지 않습니다."),
@@ -33,6 +35,7 @@ public enum ErrorCode {
 
     // 403
     FORBIDDEN_PRODUCT_SOURCE(HttpStatus.FORBIDDEN, "해당 입력 데이터에 접근할 권한이 없습니다."),
+    FORBIDDEN_FAMILY_INVITATION(HttpStatus.FORBIDDEN, "해당 가족 초대를 처리할 권한이 없습니다."),
 
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
@@ -45,6 +48,7 @@ public enum ErrorCode {
     REPAIR_REMINDER_NOT_FOUND(HttpStatus.NOT_FOUND, "예정 정보를 찾을 수 없습니다."),
     CHAT_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅 세션을 찾을 수 없습니다."),
     INVITEE_NOT_FOUND(HttpStatus.NOT_FOUND, "초대할 사용자를 찾을 수 없습니다."),
+    FAMILY_INVITATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 가족 초대를 찾을 수 없습니다."),
 
     // 409
     PRODUCT_IMAGE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 제품 이미지가 있습니다."),

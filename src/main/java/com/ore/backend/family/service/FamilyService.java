@@ -5,12 +5,16 @@ import com.ore.backend.family.dto.CreateFamilyInvitationRequest;
 import com.ore.backend.family.dto.CreateFamilyInvitationResponse;
 import com.ore.backend.family.entity.FamilyInvitationEntity;
 import com.ore.backend.family.entity.FamilyInvitationStatus;
+import com.ore.backend.family.dto.RespondFamilyInvitationRequest;
+import com.ore.backend.family.dto.RespondFamilyInvitationResponse;
+import com.ore.backend.family.entity.FamilyMembershipEntity;
 import com.ore.backend.family.repository.FamilyInvitationRepository;
 import com.ore.backend.family.repository.FamilyMembershipRepository;
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
 import com.ore.backend.global.s3.S3ImageStorageService;
 import com.ore.backend.notification.service.NotificationCreateService;
+import com.ore.backend.notification.repository.NotificationRepository;
 import com.ore.backend.user.entity.UserEntity;
 import com.ore.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +36,7 @@ public class FamilyService {
     private final FamilyMembershipRepository familyMembershipRepository;
     private final FamilyInvitationRepository familyInvitationRepository;
     private final NotificationCreateService notificationCreateService;
+    private final NotificationRepository notificationRepository;
     private final S3ImageStorageService s3ImageStorageService;
 
     public List<GetFamilyMemberResponse> getFamilyMembers(UUID userId) {
@@ -92,6 +97,35 @@ public class FamilyService {
         return CreateFamilyInvitationResponse.from(invitation);
     }
 
+    @Transactional
+    public RespondFamilyInvitationResponse respondToInvitation(
+            UUID recipientUserId,
+            UUID invitationId,
+            RespondFamilyInvitationRequest request
+    ) {
+        FamilyInvitationEntity invitation = familyInvitationRepository.findById(invitationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.FAMILY_INVITATION_NOT_FOUND));
+
+        if (!invitation.getRecipientUser().getUserId().equals(recipientUserId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN_FAMILY_INVITATION);
+        }
+
+        if (invitation.getStatus() != FamilyInvitationStatus.PENDING) {
+            throw new CustomException(ErrorCode.FAMILY_INVITATION_ALREADY_PROCESSED);
+        }
+
+        validateResponseStatus(request);
+        invitation.respond(request.getStatus());
+
+        if (request.getStatus() == FamilyInvitationStatus.ACCEPTED) {
+            createBidirectionalMemberships(invitation);
+        }
+
+        markInvitationNotificationAsRead(recipientUserId, invitationId);
+
+        return RespondFamilyInvitationResponse.from(invitation);
+    }
+
     private void validateInvitationRequest(CreateFamilyInvitationRequest request) {
         if (request == null
                 || request.getRecipientEmail() == null || request.getRecipientEmail().isBlank()
@@ -128,5 +162,40 @@ public class FamilyService {
         if (pendingInvitationExists) {
             throw new CustomException(ErrorCode.PENDING_FAMILY_INVITATION_EXISTS);
         }
+    }
+
+    private void validateResponseStatus(RespondFamilyInvitationRequest request) {
+        if (request == null
+                || (request.getStatus() != FamilyInvitationStatus.ACCEPTED
+                && request.getStatus() != FamilyInvitationStatus.REJECTED)) {
+            throw new CustomException(ErrorCode.INVALID_FAMILY_INVITATION_STATUS);
+        }
+    }
+
+    private void createBidirectionalMemberships(FamilyInvitationEntity invitation) {
+        UserEntity requester = invitation.getRequesterUser();
+        UserEntity recipient = invitation.getRecipientUser();
+
+        familyMembershipRepository.saveAll(List.of(
+                FamilyMembershipEntity.builder()
+                        .user(requester)
+                        .familyUser(recipient)
+                        .nickname(invitation.getRequestedNickname())
+                        .build(),
+                FamilyMembershipEntity.builder()
+                        .user(recipient)
+                        .familyUser(requester)
+                        .nickname(requester.getName())
+                        .build()
+        ));
+    }
+
+    private void markInvitationNotificationAsRead(UUID recipientUserId, UUID invitationId) {
+        notificationRepository.findByUser_UserIdAndReferenceTypeAndReferenceId(
+                        recipientUserId,
+                        "FAMILY_INVITATION",
+                        invitationId
+                )
+                .ifPresent(notification -> notification.updateRead());
     }
 }
