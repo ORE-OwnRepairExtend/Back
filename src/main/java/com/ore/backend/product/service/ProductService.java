@@ -273,8 +273,18 @@ public class ProductService {
     // 제품 상세 조회
     @Transactional(readOnly = true)
     public GetProductDetailResponse getProductDetail(UUID userId, UUID productId) {
-        ProductEntity product = productRepository.findByProductIdAndUser_UserId(productId, userId)
+        ProductEntity product = productRepository.findWithDetailsByProductId(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        boolean isOwner = product.getUser().getUserId().equals(userId);
+        boolean isFamilyMember = !isOwner && familyMembershipRepository.existsActiveRelationshipBetween(
+                userId,
+                product.getUser().getUserId()
+        );
+
+        if (!isOwner && !isFamilyMember) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
 
         String imageUrl = getProductImageUrl(product.getProductId());
 
