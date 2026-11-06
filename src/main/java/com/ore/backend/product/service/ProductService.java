@@ -53,6 +53,7 @@ public class ProductService {
     private final RepairReminderRepository repairReminderRepository;
     private final ChatSessionRepository chatSessionRepository;
     private final FamilyMembershipRepository familyMembershipRepository;
+    private final ProductAccessService productAccessService;
 
     // 제품 등록
     @Transactional
@@ -276,15 +277,7 @@ public class ProductService {
         ProductEntity product = productRepository.findWithDetailsByProductId(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        boolean isOwner = product.getUser().getUserId().equals(userId);
-        boolean isFamilyMember = !isOwner && familyMembershipRepository.existsActiveRelationshipBetween(
-                userId,
-                product.getUser().getUserId()
-        );
-
-        if (!isOwner && !isFamilyMember) {
-            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
-        }
+        productAccessService.validateReadAccess(userId, product);
 
         String imageUrl = getProductImageUrl(product.getProductId());
 
@@ -399,8 +392,10 @@ public class ProductService {
     // 제품 보증기간 조회
     @Transactional(readOnly = true)
     public GetProductWarrantyResponse getProductWarranty(UUID userId, UUID productId) {
-        ProductEntity product = productRepository.findByProductIdAndUser_UserId(productId, userId)
+        ProductEntity product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        productAccessService.validateReadAccess(userId, product);
 
         ProductWarrantyInfo warrantyInfo = productWarrantyCalculator.calculate(product);
 
