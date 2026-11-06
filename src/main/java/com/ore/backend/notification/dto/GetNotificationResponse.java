@@ -3,6 +3,7 @@ package com.ore.backend.notification.dto;
 import com.ore.backend.notification.entity.NotificationEntity;
 import com.ore.backend.notification.entity.NotificationStatus;
 import com.ore.backend.notification.entity.NotificationType;
+import com.ore.backend.family.entity.FamilyInvitationStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -26,6 +27,8 @@ public class GetNotificationResponse {
     private NotificationType notificationType;
 
     private NotificationStatus status;
+
+    private FamilyInvitationStatus invitationStatus;
 
     private String message;
 
@@ -54,6 +57,7 @@ public class GetNotificationResponse {
                         : notification.getReminder().getReminderId())
                 .notificationType(notification.getNotificationType())
                 .status(notification.getStatus())
+                .invitationStatus(notification.getInvitationStatus())
                 .message(notification.getMessage())
                 .isRead(notification.getIsRead())
                 .referenceType(notification.getReferenceType())

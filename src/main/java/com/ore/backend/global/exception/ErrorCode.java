@@ -27,6 +27,7 @@ public enum ErrorCode {
     CANNOT_INVITE_SELF(HttpStatus.BAD_REQUEST, "본인에게는 가족 초대를 보낼 수 없습니다."),
     FAMILY_INVITATION_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "이미 처리된 가족 초대입니다."),
     INVALID_FAMILY_INVITATION_STATUS(HttpStatus.BAD_REQUEST, "가족 초대 상태가 올바르지 않습니다."),
+    FAMILY_INVITATION_NICKNAME_REQUIRED(HttpStatus.BAD_REQUEST, "가족 초대 수락 시 호칭은 필수입니다."),
 
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증 정보가 유효하지 않습니다."),
