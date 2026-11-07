@@ -118,12 +118,15 @@ public class FamilyService {
         invitation.respond(request.getStatus());
 
         if (request.getStatus() == FamilyInvitationStatus.ACCEPTED) {
-            createBidirectionalMemberships(invitation);
+            createBidirectionalMemberships(invitation, request.getNickname().trim());
         }
 
-        markInvitationNotificationAsRead(recipientUserId, invitationId);
+        markInvitationNotificationAsRead(recipientUserId, invitation);
 
-        return RespondFamilyInvitationResponse.from(invitation);
+        return RespondFamilyInvitationResponse.from(
+                invitation,
+                request.getStatus() == FamilyInvitationStatus.ACCEPTED ? request.getNickname().trim() : null
+        );
     }
 
     @Transactional
@@ -174,9 +177,14 @@ public class FamilyService {
                 && request.getStatus() != FamilyInvitationStatus.REJECTED)) {
             throw new CustomException(ErrorCode.INVALID_FAMILY_INVITATION_STATUS);
         }
+
+        if (request.getStatus() == FamilyInvitationStatus.ACCEPTED
+                && (request.getNickname() == null || request.getNickname().isBlank())) {
+            throw new CustomException(ErrorCode.FAMILY_INVITATION_NICKNAME_REQUIRED);
+        }
     }
 
-    private void createBidirectionalMemberships(FamilyInvitationEntity invitation) {
+    private void createBidirectionalMemberships(FamilyInvitationEntity invitation, String requesterNickname) {
         UserEntity requester = invitation.getRequesterUser();
         UserEntity recipient = invitation.getRecipientUser();
 
@@ -189,17 +197,20 @@ public class FamilyService {
                 FamilyMembershipEntity.builder()
                         .user(recipient)
                         .familyUser(requester)
-                        .nickname(requester.getName())
+                        .nickname(requesterNickname)
                         .build()
         ));
     }
 
-    private void markInvitationNotificationAsRead(UUID recipientUserId, UUID invitationId) {
+    private void markInvitationNotificationAsRead(UUID recipientUserId, FamilyInvitationEntity invitation) {
         notificationRepository.findByUser_UserIdAndReferenceTypeAndReferenceId(
                         recipientUserId,
                         FamilyInvitationEntity.NOTIFICATION_REFERENCE_TYPE,
-                        invitationId
+                        invitation.getFamilyInvitationId()
                 )
-                .ifPresent(notification -> notification.updateRead());
+                .ifPresent(notification -> {
+                    notification.updateRead();
+                    notification.updateInvitationStatus(invitation.getStatus());
+                });
     }
 }

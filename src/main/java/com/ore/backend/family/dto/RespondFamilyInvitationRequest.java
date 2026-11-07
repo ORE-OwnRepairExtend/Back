@@ -9,4 +9,6 @@ import lombok.NoArgsConstructor;
 public class RespondFamilyInvitationRequest {
 
     private FamilyInvitationStatus status;
+
+    private String nickname;
 }

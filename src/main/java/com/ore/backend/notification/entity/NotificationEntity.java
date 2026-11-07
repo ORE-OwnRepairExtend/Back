@@ -3,6 +3,7 @@ package com.ore.backend.notification.entity;
 import com.ore.backend.product.entity.ProductEntity;
 import com.ore.backend.repairReminder.entity.RepairReminderEntity;
 import com.ore.backend.user.entity.UserEntity;
+import com.ore.backend.family.entity.FamilyInvitationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -56,6 +57,10 @@ public class NotificationEntity {
     @Column(name = "reference_id")
     private UUID referenceId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "invitation_status", length = 20)
+    private FamilyInvitationStatus invitationStatus;
+
     @Column(name = "is_read", nullable = false)
     private Boolean isRead = false;
 
@@ -72,7 +77,8 @@ public class NotificationEntity {
             ReminderNotificationStage reminderStage,
             String message,
             String referenceType,
-            UUID referenceId
+            UUID referenceId,
+            FamilyInvitationStatus invitationStatus
     ) {
         this.user = user;
         this.product = product;
@@ -83,11 +89,16 @@ public class NotificationEntity {
         this.message = message;
         this.referenceType = referenceType;
         this.referenceId = referenceId;
+        this.invitationStatus = invitationStatus;
         this.isRead = false;
     }
 
     public void updateRead() {
         this.isRead = true;
+    }
+
+    public void updateInvitationStatus(FamilyInvitationStatus invitationStatus) {
+        this.invitationStatus = invitationStatus;
     }
 
     @PrePersist

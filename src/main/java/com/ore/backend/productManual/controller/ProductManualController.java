@@ -21,9 +21,13 @@ public class ProductManualController {
 
     @GetMapping("/{productId}/manual")
     public ResponseEntity<ProductManualResponse> getProductManual(
+            @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable UUID productId
     ) {
-        ProductManualResponse response = productManualService.getProductManual(productId);
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        ProductManualResponse response = productManualService.getProductManual(userId, productId);
 
         return ResponseEntity.ok(response);
     }

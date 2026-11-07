@@ -5,6 +5,7 @@ import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
 import com.ore.backend.product.entity.ProductEntity;
 import com.ore.backend.product.repository.ProductRepository;
+import com.ore.backend.product.service.ProductAccessService;
 import com.ore.backend.productManual.dto.AiProductManualResponse;
 import com.ore.backend.productModel.entity.ProductModelEntity;
 import com.ore.backend.productManual.dto.ProductManualResponse;
@@ -13,6 +14,7 @@ import com.ore.backend.productManual.repository.ProductManualRepository;
 import com.ore.backend.productModel.repository.ProductModelRepository;
 import com.ore.backend.productSource.entity.ProductSourceEntity;
 import com.ore.backend.productSource.repository.ProductSourceRepository;
+import com.ore.backend.productUserManual.repository.ProductUserManualRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,13 +30,23 @@ public class ProductManualService {
     private final ProductManualRepository productManualRepository;
     private final ProductSourceRepository productSourceRepository;
     private final ProductModelRepository productModelRepository;
+    private final ProductUserManualRepository productUserManualRepository;
+    private final ProductAccessService productAccessService;
     private final AiClient aiClient;
 
-    // 제품에 연결된 모델의 공식 매뉴얼 조회
-    public ProductManualResponse getProductManual(UUID productId) {
+    // 제품에 연결된 공식 매뉴얼 또는 사용자가 직접 입력한 매뉴얼 조회
+    public ProductManualResponse getProductManual(UUID userId, UUID productId) {
         ProductEntity product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
+        productAccessService.validateReadAccess(userId, product);
+
+        return productUserManualRepository.findByProduct_ProductId(productId)
+                .map(ProductManualResponse::from)
+                .orElseGet(() -> getOfficialManual(product));
+    }
+
+    private ProductManualResponse getOfficialManual(ProductEntity product) {
         ProductModelEntity model = product.getModel();
 
         if (model == null) {

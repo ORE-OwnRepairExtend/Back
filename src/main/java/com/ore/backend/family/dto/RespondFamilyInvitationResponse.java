@@ -18,11 +18,14 @@ public class RespondFamilyInvitationResponse {
     private FamilyMember familyMember;
     private LocalDateTime respondedAt;
 
-    public static RespondFamilyInvitationResponse from(FamilyInvitationEntity invitation) {
+    public static RespondFamilyInvitationResponse from(
+            FamilyInvitationEntity invitation,
+            String nickname
+    ) {
         return RespondFamilyInvitationResponse.builder()
                 .invitationId(invitation.getFamilyInvitationId())
                 .status(invitation.getStatus())
-                .familyMember(FamilyMember.from(invitation.getRequesterUser()))
+                .familyMember(FamilyMember.from(invitation.getRequesterUser(), nickname))
                 .respondedAt(invitation.getRespondedAt())
                 .build();
     }
@@ -36,12 +39,12 @@ public class RespondFamilyInvitationResponse {
         private String email;
         private String nickname;
 
-        private static FamilyMember from(UserEntity user) {
+        private static FamilyMember from(UserEntity user, String nickname) {
             return FamilyMember.builder()
                     .userId(user.getUserId())
                     .name(user.getName())
                     .email(user.getEmail())
-                    .nickname(user.getName())
+                    .nickname(nickname)
                     .build();
         }
     }
