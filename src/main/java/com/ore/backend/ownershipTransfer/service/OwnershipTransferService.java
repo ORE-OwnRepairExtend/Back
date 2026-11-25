@@ -3,8 +3,11 @@ package com.ore.backend.ownershipTransfer.service;
 import com.ore.backend.global.exception.CustomException;
 import com.ore.backend.global.exception.ErrorCode;
 import com.ore.backend.notification.service.NotificationCreateService;
+import com.ore.backend.notification.repository.NotificationRepository;
 import com.ore.backend.ownershipTransfer.dto.CreateOwnershipTransferRequest;
 import com.ore.backend.ownershipTransfer.dto.CreateOwnershipTransferResponse;
+import com.ore.backend.ownershipTransfer.dto.RespondOwnershipTransferRequest;
+import com.ore.backend.ownershipTransfer.dto.RespondOwnershipTransferResponse;
 import com.ore.backend.ownershipTransfer.entity.OwnershipTransferEntity;
 import com.ore.backend.ownershipTransfer.entity.OwnershipTransferStatus;
 import com.ore.backend.ownershipTransfer.repository.OwnershipTransferRepository;
@@ -27,6 +30,7 @@ public class OwnershipTransferService {
     private final UserRepository userRepository;
     private final OwnershipTransferRepository ownershipTransferRepository;
     private final NotificationCreateService notificationCreateService;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public CreateOwnershipTransferResponse createTransferRequest(
@@ -71,11 +75,61 @@ public class OwnershipTransferService {
         return CreateOwnershipTransferResponse.from(transfer);
     }
 
+    @Transactional
+    public RespondOwnershipTransferResponse respondToTransfer(
+            UUID recipientUserId,
+            UUID transferId,
+            RespondOwnershipTransferRequest request
+    ) {
+        OwnershipTransferEntity transfer = ownershipTransferRepository.findWithLockByTransferId(transferId)
+                .orElseThrow(() -> new CustomException(ErrorCode.OWNERSHIP_TRANSFER_NOT_FOUND));
+
+        if (!transfer.getRecipientUser().getUserId().equals(recipientUserId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN_OWNERSHIP_TRANSFER);
+        }
+
+        if (transfer.getStatus() != OwnershipTransferStatus.PENDING) {
+            throw new CustomException(ErrorCode.OWNERSHIP_TRANSFER_ALREADY_PROCESSED);
+        }
+
+        validateResponseRequest(request);
+        transfer.respond(request.getStatus(), Boolean.TRUE.equals(request.getPrivacyAgreed()));
+
+        if (request.getStatus() == OwnershipTransferStatus.ACCEPTED) {
+            transfer.getProduct().changeOwner(transfer.getRecipientUser());
+        }
+
+        notificationRepository.findByUser_UserIdAndReferenceTypeAndReferenceId(
+                        recipientUserId,
+                        OwnershipTransferEntity.NOTIFICATION_REFERENCE_TYPE,
+                        transferId
+                )
+                .ifPresent(notification -> {
+                    notification.updateRead();
+                    notification.updateOwnershipTransferStatus(transfer.getStatus());
+                });
+
+        return RespondOwnershipTransferResponse.from(transfer);
+    }
+
     private String validateAndNormalizeRecipientEmail(CreateOwnershipTransferRequest request) {
         if (request == null || request.getRecipientEmail() == null || request.getRecipientEmail().isBlank()) {
             throw new CustomException(ErrorCode.OWNERSHIP_TRANSFER_RECIPIENT_REQUIRED);
         }
 
         return request.getRecipientEmail().trim();
+    }
+
+    private void validateResponseRequest(RespondOwnershipTransferRequest request) {
+        if (request == null
+                || (request.getStatus() != OwnershipTransferStatus.ACCEPTED
+                && request.getStatus() != OwnershipTransferStatus.REJECTED)) {
+            throw new CustomException(ErrorCode.INVALID_OWNERSHIP_TRANSFER_STATUS);
+        }
+
+        if (request.getStatus() == OwnershipTransferStatus.ACCEPTED
+                && !Boolean.TRUE.equals(request.getPrivacyAgreed())) {
+            throw new CustomException(ErrorCode.PRIVACY_NOTICE_AGREEMENT_REQUIRED);
+        }
     }
 }

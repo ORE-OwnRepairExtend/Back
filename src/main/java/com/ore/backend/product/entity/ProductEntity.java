@@ -94,6 +94,11 @@ public class ProductEntity {
         this.isFavorite = isFavorite;
     }
 
+    public void changeOwner(UserEntity user) {
+        this.user = user;
+        this.isFavorite = false;
+    }
+
     @PrePersist
     public void prePersist() {
         this.createdAt = LocalDateTime.now();

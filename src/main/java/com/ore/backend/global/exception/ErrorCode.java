@@ -30,6 +30,9 @@ public enum ErrorCode {
     FAMILY_INVITATION_NICKNAME_REQUIRED(HttpStatus.BAD_REQUEST, "가족 초대 수락 시 호칭은 필수입니다."),
     OWNERSHIP_TRANSFER_RECIPIENT_REQUIRED(HttpStatus.BAD_REQUEST, "소유권 이전 대상 이메일은 필수입니다."),
     CANNOT_TRANSFER_TO_SELF(HttpStatus.BAD_REQUEST, "본인에게는 소유권 이전을 요청할 수 없습니다."),
+    OWNERSHIP_TRANSFER_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "이미 처리된 소유권 이전 요청입니다."),
+    PRIVACY_NOTICE_AGREEMENT_REQUIRED(HttpStatus.BAD_REQUEST, "소유권 이전 수락을 위해 개인정보 처리 안내 동의가 필요합니다."),
+    INVALID_OWNERSHIP_TRANSFER_STATUS(HttpStatus.BAD_REQUEST, "소유권 이전 상태가 올바르지 않습니다."),
 
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증 정보가 유효하지 않습니다."),
@@ -42,6 +45,7 @@ public enum ErrorCode {
     FORBIDDEN_FAMILY_INVITATION(HttpStatus.FORBIDDEN, "해당 가족 초대를 처리할 권한이 없습니다."),
     FORBIDDEN_FAMILY_MEMBER(HttpStatus.FORBIDDEN, "해당 가족 구성원에 접근할 권한이 없습니다."),
     FORBIDDEN_OWNERSHIP_TRANSFER_REQUEST(HttpStatus.FORBIDDEN, "제품 소유자만 소유권 이전을 요청할 수 있습니다."),
+    FORBIDDEN_OWNERSHIP_TRANSFER(HttpStatus.FORBIDDEN, "해당 소유권 이전 요청을 처리할 권한이 없습니다."),
 
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
@@ -57,6 +61,7 @@ public enum ErrorCode {
     FAMILY_INVITATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 가족 초대를 찾을 수 없습니다."),
     FAMILY_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "가족 구성원을 찾을 수 없습니다."),
     OWNERSHIP_TRANSFER_RECIPIENT_NOT_FOUND(HttpStatus.NOT_FOUND, "소유권을 이전할 사용자를 찾을 수 없습니다."),
+    OWNERSHIP_TRANSFER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 소유권 이전 요청을 찾을 수 없습니다."),
 
     // 409
     PRODUCT_IMAGE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 등록된 제품 이미지가 있습니다."),

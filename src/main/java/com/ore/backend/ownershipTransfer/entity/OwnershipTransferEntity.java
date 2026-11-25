@@ -53,8 +53,17 @@ public class OwnershipTransferEntity {
     @Column(name = "status", nullable = false, length = 20)
     private OwnershipTransferStatus status;
 
+    @Column(name = "privacy_agreed_at")
+    private LocalDateTime privacyAgreedAt;
+
     @Column(name = "requested_at", nullable = false, updatable = false)
     private LocalDateTime requestedAt;
+
+    @Column(name = "responded_at")
+    private LocalDateTime respondedAt;
+
+    @Column(name = "transferred_at")
+    private LocalDateTime transferredAt;
 
     @Builder
     public OwnershipTransferEntity(
@@ -76,6 +85,16 @@ public class OwnershipTransferEntity {
 
         if (this.status == null) {
             this.status = OwnershipTransferStatus.PENDING;
+        }
+    }
+
+    public void respond(OwnershipTransferStatus status, boolean privacyAgreed) {
+        this.status = status;
+        this.respondedAt = LocalDateTime.now();
+
+        if (status == OwnershipTransferStatus.ACCEPTED) {
+            this.privacyAgreedAt = privacyAgreed ? this.respondedAt : null;
+            this.transferredAt = this.respondedAt;
         }
     }
 }
