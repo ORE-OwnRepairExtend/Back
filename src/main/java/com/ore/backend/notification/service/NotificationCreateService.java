@@ -9,6 +9,8 @@ import com.ore.backend.product.entity.ProductEntity;
 import com.ore.backend.repairReminder.entity.RepairReminderEntity;
 import com.ore.backend.family.entity.FamilyInvitationEntity;
 import com.ore.backend.family.entity.FamilyInvitationStatus;
+import com.ore.backend.ownershipTransfer.entity.OwnershipTransferEntity;
+import com.ore.backend.ownershipTransfer.entity.OwnershipTransferStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +56,7 @@ public class NotificationCreateService {
                 .referenceType(null)
                 .referenceId(null)
                 .invitationStatus(null)
+                .ownershipTransferStatus(null)
                 .build();
 
         notificationRepository.save(notification);
@@ -90,6 +93,7 @@ public class NotificationCreateService {
                 .referenceType(null)
                 .referenceId(null)
                 .invitationStatus(null)
+                .ownershipTransferStatus(null)
                 .build();
 
         notificationRepository.save(notification);
@@ -108,6 +112,26 @@ public class NotificationCreateService {
                 .referenceType(FamilyInvitationEntity.NOTIFICATION_REFERENCE_TYPE)
                 .referenceId(invitation.getFamilyInvitationId())
                 .invitationStatus(FamilyInvitationStatus.PENDING)
+                .ownershipTransferStatus(null)
+                .build();
+
+        notificationRepository.save(notification);
+    }
+
+    @Transactional
+    public void createOwnershipTransferNotification(OwnershipTransferEntity transfer) {
+        NotificationEntity notification = NotificationEntity.builder()
+                .user(transfer.getRecipientUser())
+                .product(transfer.getProduct())
+                .reminder(null)
+                .notificationType(NotificationType.OWNERSHIP_TRANSFER)
+                .status(null)
+                .reminderStage(null)
+                .message(transfer.getRequesterUser().getName() + "님이 제품 소유권 이전을 요청했습니다.")
+                .referenceType(OwnershipTransferEntity.NOTIFICATION_REFERENCE_TYPE)
+                .referenceId(transfer.getTransferId())
+                .invitationStatus(null)
+                .ownershipTransferStatus(OwnershipTransferStatus.PENDING)
                 .build();
 
         notificationRepository.save(notification);

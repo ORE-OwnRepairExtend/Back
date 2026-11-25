@@ -4,6 +4,7 @@ import com.ore.backend.product.entity.ProductEntity;
 import com.ore.backend.repairReminder.entity.RepairReminderEntity;
 import com.ore.backend.user.entity.UserEntity;
 import com.ore.backend.family.entity.FamilyInvitationStatus;
+import com.ore.backend.ownershipTransfer.entity.OwnershipTransferStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -61,6 +62,10 @@ public class NotificationEntity {
     @Column(name = "invitation_status", length = 20)
     private FamilyInvitationStatus invitationStatus;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ownership_transfer_status", length = 20)
+    private OwnershipTransferStatus ownershipTransferStatus;
+
     @Column(name = "is_read", nullable = false)
     private Boolean isRead = false;
 
@@ -78,7 +83,8 @@ public class NotificationEntity {
             String message,
             String referenceType,
             UUID referenceId,
-            FamilyInvitationStatus invitationStatus
+            FamilyInvitationStatus invitationStatus,
+            OwnershipTransferStatus ownershipTransferStatus
     ) {
         this.user = user;
         this.product = product;
@@ -90,6 +96,7 @@ public class NotificationEntity {
         this.referenceType = referenceType;
         this.referenceId = referenceId;
         this.invitationStatus = invitationStatus;
+        this.ownershipTransferStatus = ownershipTransferStatus;
         this.isRead = false;
     }
 
@@ -99,6 +106,10 @@ public class NotificationEntity {
 
     public void updateInvitationStatus(FamilyInvitationStatus invitationStatus) {
         this.invitationStatus = invitationStatus;
+    }
+
+    public void updateOwnershipTransferStatus(OwnershipTransferStatus ownershipTransferStatus) {
+        this.ownershipTransferStatus = ownershipTransferStatus;
     }
 
     @PrePersist

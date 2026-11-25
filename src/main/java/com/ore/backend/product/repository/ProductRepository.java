@@ -2,7 +2,11 @@ package com.ore.backend.product.repository;
 
 import com.ore.backend.product.entity.ProductEntity;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import jakarta.persistence.LockModeType;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +23,10 @@ public interface ProductRepository extends JpaRepository<ProductEntity, UUID> {
 
     @EntityGraph(attributePaths = {"source", "model", "user"})
     Optional<ProductEntity> findWithDetailsByProductId(UUID productId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from ProductEntity p join fetch p.user where p.productId = :productId")
+    Optional<ProductEntity> findWithLockByProductId(@Param("productId") UUID productId);
 
     List<ProductEntity> findByUser_UserId(UUID userId);
 

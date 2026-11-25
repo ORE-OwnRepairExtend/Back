@@ -4,6 +4,7 @@ import com.ore.backend.notification.entity.NotificationEntity;
 import com.ore.backend.notification.entity.NotificationStatus;
 import com.ore.backend.notification.entity.NotificationType;
 import com.ore.backend.family.entity.FamilyInvitationStatus;
+import com.ore.backend.ownershipTransfer.entity.OwnershipTransferStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -29,6 +30,8 @@ public class GetNotificationResponse {
     private NotificationStatus status;
 
     private FamilyInvitationStatus invitationStatus;
+
+    private OwnershipTransferStatus ownershipTransferStatus;
 
     private String message;
 
@@ -58,6 +61,7 @@ public class GetNotificationResponse {
                 .notificationType(notification.getNotificationType())
                 .status(notification.getStatus())
                 .invitationStatus(notification.getInvitationStatus())
+                .ownershipTransferStatus(notification.getOwnershipTransferStatus())
                 .message(notification.getMessage())
                 .isRead(notification.getIsRead())
                 .referenceType(notification.getReferenceType())
