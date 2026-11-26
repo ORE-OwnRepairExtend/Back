@@ -1,6 +1,7 @@
 package com.ore.backend.repairHistory.entity;
 
 import com.ore.backend.product.entity.ProductEntity;
+import com.ore.backend.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,6 +23,10 @@ public class RepairHistoryEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
     private ProductEntity product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id")
+    private UserEntity createdByUser;
 
     @Column(name = "title", nullable = false, length = 100)
     private String title;
@@ -47,6 +52,7 @@ public class RepairHistoryEntity {
     @Builder
     public RepairHistoryEntity(
             ProductEntity product,
+            UserEntity createdByUser,
             String title,
             LocalDate date,
             String content,
@@ -55,6 +61,7 @@ public class RepairHistoryEntity {
             String imageUrl
     ) {
         this.product = product;
+        this.createdByUser = createdByUser;
         this.title = title;
         this.date = date;
         this.content = content;
@@ -97,6 +104,10 @@ public class RepairHistoryEntity {
 
     public void deleteImage() {
         this.imageUrl = null;
+    }
+
+    public boolean isEditableBy(UUID userId) {
+        return createdByUser == null || createdByUser.getUserId().equals(userId);
     }
 
     @PrePersist

@@ -2,6 +2,9 @@ package com.ore.backend.product.controller;
 
 import com.ore.backend.product.dto.*;
 import com.ore.backend.product.service.ProductService;
+import com.ore.backend.ownershipTransfer.dto.CreateOwnershipTransferRequest;
+import com.ore.backend.ownershipTransfer.dto.CreateOwnershipTransferResponse;
+import com.ore.backend.ownershipTransfer.service.OwnershipTransferService;
 import com.ore.backend.security.JwtProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ import java.util.UUID;
 public class ProductController {
 
     private final ProductService productService;
+    private final OwnershipTransferService ownershipTransferService;
     private final JwtProvider jwtProvider;
 
     @PostMapping
@@ -110,6 +114,24 @@ public class ProductController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{productId}/ownership-transfers")
+    public ResponseEntity<CreateOwnershipTransferResponse> createOwnershipTransfer(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable UUID productId,
+            @RequestBody CreateOwnershipTransferRequest request
+    ) {
+        String accessToken = authorizationHeader.replace("Bearer ", "");
+        UUID userId = jwtProvider.getUserId(accessToken);
+
+        CreateOwnershipTransferResponse response = ownershipTransferService.createTransferRequest(
+                userId,
+                productId,
+                request
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{productId}/warranty")

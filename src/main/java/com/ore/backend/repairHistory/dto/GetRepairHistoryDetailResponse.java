@@ -19,11 +19,13 @@ public class GetRepairHistoryDetailResponse {
     private Integer cost;
     private String serviceCenter;
     private String imageUrl;
+    private Boolean isEditable;
     private LocalDateTime createdAt;
 
     public static GetRepairHistoryDetailResponse of(
             RepairHistoryEntity repairHistory,
-            String imageUrl
+            String imageUrl,
+            boolean isEditable
     ) {
         return GetRepairHistoryDetailResponse.builder()
                 .repairId(repairHistory.getRepairId())
@@ -33,6 +35,7 @@ public class GetRepairHistoryDetailResponse {
                 .cost(repairHistory.getCost())
                 .serviceCenter(repairHistory.getServiceCenter())
                 .imageUrl(imageUrl)
+                .isEditable(isEditable)
                 .createdAt(repairHistory.getCreatedAt())
                 .build();
     }

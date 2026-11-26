@@ -1,8 +1,11 @@
 package com.ore.backend.repairHistory.repository;
 
 import com.ore.backend.repairHistory.entity.RepairHistoryEntity;
+import com.ore.backend.user.entity.UserEntity;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +36,18 @@ public interface RepairHistoryRepository extends JpaRepository<RepairHistoryEnti
             where rh.product.productId in :productIds
             """)
     List<UUID> findProductIdsHavingRepairHistory(List<UUID> productIds);
+
+    @Modifying(flushAutomatically = true)
+    @Query("""
+            update RepairHistoryEntity r
+            set r.createdByUser = :creator
+            where r.product.productId = :productId
+              and r.createdByUser is null
+            """)
+    void assignCreatorIfMissing(
+            @Param("productId") UUID productId,
+            @Param("creator") UserEntity creator
+    );
 
     void deleteByProduct_ProductId(UUID productId);
 }
