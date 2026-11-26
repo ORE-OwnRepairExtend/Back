@@ -46,6 +46,7 @@ public enum ErrorCode {
     FORBIDDEN_FAMILY_MEMBER(HttpStatus.FORBIDDEN, "해당 가족 구성원에 접근할 권한이 없습니다."),
     FORBIDDEN_OWNERSHIP_TRANSFER_REQUEST(HttpStatus.FORBIDDEN, "제품 소유자만 소유권 이전을 요청할 수 있습니다."),
     FORBIDDEN_OWNERSHIP_TRANSFER(HttpStatus.FORBIDDEN, "해당 소유권 이전 요청을 처리할 권한이 없습니다."),
+    FORBIDDEN_REPAIR_HISTORY_MODIFICATION(HttpStatus.FORBIDDEN, "소유권 이전 전 등록된 수리 이력은 수정하거나 삭제할 수 없습니다."),
 
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),

@@ -13,6 +13,7 @@ import com.ore.backend.ownershipTransfer.entity.OwnershipTransferStatus;
 import com.ore.backend.ownershipTransfer.repository.OwnershipTransferRepository;
 import com.ore.backend.product.entity.ProductEntity;
 import com.ore.backend.product.repository.ProductRepository;
+import com.ore.backend.repairHistory.repository.RepairHistoryRepository;
 import com.ore.backend.user.entity.UserEntity;
 import com.ore.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ public class OwnershipTransferService {
     private final OwnershipTransferRepository ownershipTransferRepository;
     private final NotificationCreateService notificationCreateService;
     private final NotificationRepository notificationRepository;
+    private final RepairHistoryRepository repairHistoryRepository;
 
     @Transactional
     public CreateOwnershipTransferResponse createTransferRequest(
@@ -96,6 +98,10 @@ public class OwnershipTransferService {
         transfer.respond(request.getStatus(), Boolean.TRUE.equals(request.getPrivacyAgreed()));
 
         if (request.getStatus() == OwnershipTransferStatus.ACCEPTED) {
+            repairHistoryRepository.assignCreatorIfMissing(
+                    transfer.getProduct().getProductId(),
+                    transfer.getRequesterUser()
+            );
             transfer.getProduct().changeOwner(transfer.getRecipientUser());
         }
 

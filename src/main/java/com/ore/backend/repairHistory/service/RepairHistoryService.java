@@ -12,6 +12,8 @@ import com.ore.backend.repairHistory.dto.UpdateRepairHistoryResponse;
 import com.ore.backend.repairHistory.entity.RepairHistoryEntity;
 import com.ore.backend.repairHistory.repository.RepairHistoryRepository;
 import com.ore.backend.repairReminder.repository.RepairReminderRepository;
+import com.ore.backend.user.entity.UserEntity;
+import com.ore.backend.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +32,7 @@ public class RepairHistoryService {
     private final RepairHistoryRepository repairHistoryRepository;
     private final S3ImageStorageService s3ImageStorageService;
     private final RepairReminderRepository repairReminderRepository;
+    private final UserRepository userRepository;
 
     // 수리 이력 등록
     @Transactional
@@ -49,6 +52,8 @@ public class RepairHistoryService {
         // 사용자 제품 조회
         ProductEntity product = productRepository.findByProductIdAndUser_UserId(productId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 수리 이미지 업로드
         String imageKey = uploadImage(productId, image);
@@ -56,6 +61,7 @@ public class RepairHistoryService {
         // 수리 이력 저장
         RepairHistoryEntity repairHistory = RepairHistoryEntity.builder()
                 .product(product)
+                .createdByUser(user)
                 .date(date)
                 .title(title)
                 .content(content)
@@ -110,7 +116,14 @@ public class RepairHistoryService {
 
         return repairHistoryRepository.findByProduct_ProductIdOrderByDateDescCreatedAtDesc(productId)
                 .stream()
-                .map(GetRepairHistoryResponse::from)
+                .map(repairHistory -> {
+                    boolean isEditable = repairHistory.isEditableBy(userId);
+                    String imageUrl = isEditable && repairHistory.getImageUrl() != null
+                            ? s3ImageStorageService.generatePresignedUrl(repairHistory.getImageUrl())
+                            : null;
+
+                    return GetRepairHistoryResponse.of(repairHistory, imageUrl, isEditable);
+                })
                 .toList();
     }
 
@@ -123,11 +136,12 @@ public class RepairHistoryService {
                 .findByRepairIdAndProduct_User_UserId(repairId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_HISTORY_NOT_FOUND));
 
-        String imageUrl = repairHistory.getImageUrl() == null
-                ? null
-                : s3ImageStorageService.generatePresignedUrl(repairHistory.getImageUrl());
+        boolean isEditable = repairHistory.isEditableBy(userId);
+        String imageUrl = isEditable && repairHistory.getImageUrl() != null
+                ? s3ImageStorageService.generatePresignedUrl(repairHistory.getImageUrl())
+                : null;
 
-        return GetRepairHistoryDetailResponse.of(repairHistory, imageUrl);
+        return GetRepairHistoryDetailResponse.of(repairHistory, imageUrl, isEditable);
     }
 
     // 수리 이력 수정
@@ -147,6 +161,8 @@ public class RepairHistoryService {
         RepairHistoryEntity repairHistory = repairHistoryRepository
                 .findByRepairIdAndProduct_User_UserId(repairId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_HISTORY_NOT_FOUND));
+
+        validateEditable(repairHistory, userId);
 
         repairHistory.updateRepairHistory(
                 title,
@@ -228,6 +244,8 @@ public class RepairHistoryService {
                 .findByRepairIdAndProduct_User_UserId(repairId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_HISTORY_NOT_FOUND));
 
+        validateEditable(repairHistory, userId);
+
         String imageKey = repairHistory.getImageUrl();
 
         if (imageKey == null || imageKey.isBlank()) {
@@ -250,6 +268,8 @@ public class RepairHistoryService {
                 )
                 .orElseThrow(() -> new CustomException(ErrorCode.REPAIR_HISTORY_NOT_FOUND));
 
+        validateEditable(repairHistory, userId);
+
         // 이력을 참조하는 수리 예정은 남기고 repair 연결만 해제
         repairReminderRepository.updateRepairToNullByRepairId(repairId);
 
@@ -261,5 +281,11 @@ public class RepairHistoryService {
         }
 
         repairHistoryRepository.delete(repairHistory);
+    }
+
+    private void validateEditable(RepairHistoryEntity repairHistory, UUID userId) {
+        if (!repairHistory.isEditableBy(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN_REPAIR_HISTORY_MODIFICATION);
+        }
     }
 }
